@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Magnifique — El Juego</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a1628;--navy-mid:#162240;--navy-light:#1e3358;
+  --gold:#c9a84c;--gold-light:#e8c97a;--gold-pale:#f5e6c0;
+  --cream:#faf6ee;--green:#2ecc71;--red:#e74c3c;
+  --text-light:rgba(255,255,255,0.82);
+}
+body{font-family:'Cormorant Garamond',Georgia,serif;background:var(--navy);color:var(--cream);min-height:100vh;overflow-x:hidden}
+
+/* ══════ INTRO ══════ */
+#intro-screen{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:40px 20px;
+  background:radial-gradient(ellipse at 50% 30%,#1a2e45 0%,#0a1628 70%);
+  position:relative;overflow:hidden;
+}
+#intro-screen::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 60px,rgba(201,168,76,0.025) 60px,rgba(201,168,76,0.025) 61px);
+}
+.hotel-art{width:280px;height:200px;margin-bottom:28px;filter:drop-shadow(0 0 50px rgba(201,168,76,0.35));position:relative;z-index:1}
+.intro-title{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,4rem);font-weight:900;color:var(--gold);letter-spacing:0.06em;text-align:center;line-height:1;position:relative;z-index:1}
+.intro-sub{font-size:clamp(0.75rem,2vw,0.9rem);color:rgba(201,168,76,0.7);letter-spacing:0.35em;text-transform:uppercase;margin-top:8px;text-align:center;position:relative;z-index:1}
+.intro-desc{max-width:480px;text-align:center;color:var(--text-light);font-size:1.05rem;line-height:1.75;margin:20px auto;position:relative;z-index:1}
+.gold-line{width:180px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:18px auto}
+.intro-badges{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;position:relative;z-index:1}
+.intro-badge{font-size:0.85rem;color:rgba(201,168,76,0.85);background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.3);padding:6px 14px}
+
+/* ══════ BUTTONS ══════ */
+.btn-gold{
+  background:linear-gradient(135deg,#b8912e 0%,var(--gold-light) 50%,#b8912e 100%);
+  color:var(--navy);border:none;padding:15px 44px;
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+  letter-spacing:0.12em;cursor:pointer;text-transform:uppercase;
+  clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);
+  transition:all .25s;position:relative;z-index:1;
+}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,0.55)}
+.btn-gold:active{transform:translateY(0)}
+
+/* ══════ GAME SCREEN ══════ */
+#game-screen{display:none;flex-direction:column;min-height:100vh}
+
+/* TOP BAR */
+.top-bar{
+  background:var(--navy-mid);border-bottom:2px solid var(--gold);
+  padding:10px 20px;display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:20;flex-wrap:wrap;gap:8px;
+}
+.hotel-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:0.04em}
+.hotel-logo span{font-size:0.65rem;letter-spacing:0.2em;color:rgba(201,168,76,0.6);display:block;font-family:'Cormorant Garamond',serif;font-weight:300}
+.top-stats{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.stat-chip{display:flex;flex-direction:column;align-items:center;min-width:60px}
+.sc-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.6)}
+.sc-value{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--gold-light);line-height:1.2}
+.sc-value.warn{color:var(--red)}
+.day-bar{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(201,168,76,0.12)}
+.day-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width .5s ease}
+
+/* MAIN GRID */
+.game-main{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:16px;padding:16px 20px;flex:1}
+@media(max-width:960px){.game-main{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.game-main{grid-template-columns:1fr}}
+
+/* PANELS */
+.panel{
+  background:var(--navy-mid);border:1px solid rgba(201,168,76,0.25);
+  border-top:3px solid var(--gold);padding:18px;position:relative;
+}
+.panel-title{
+  font-family:'Playfair Display',serif;font-size:0.78rem;letter-spacing:0.28em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid rgba(201,168,76,0.18);
+}
+/* Corner decorations */
+.panel::before,.panel::after{content:'◆';position:absolute;font-size:0.55rem;color:rgba(201,168,76,0.4)}
+.panel::before{top:6px;left:6px}
+.panel::after{bottom:6px;right:6px}
+
+/* FORECAST */
+.fc-item{margin-bottom:12px;padding:10px 12px;background:rgba(201,168,76,0.04);border-left:3px solid rgba(201,168,76,0.5)}
+.fc-lbl{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px}
+.fc-val{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-light)}
+.fc-desc{font-size:0.82rem;color:var(--text-light);margin-top:4px;font-style:italic;line-height:1.45}
+.demand-badge{display:inline-block;padding:3px 12px;font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;border-radius:1px;margin-top:6px}
+.d-muy-alta{background:rgba(46,204,113,.18);color:#2ecc71;border:1px solid #2ecc71}
+.d-alta{background:rgba(39,174,96,.15);color:#27ae60;border:1px solid #27ae60}
+.d-media{background:rgba(241,196,15,.15);color:#f1c40f;border:1px solid #f1c40f}
+.d-baja{background:rgba(230,126,34,.15);color:#e67e22;border:1px solid #e67e22}
+.d-muy-baja{background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid #e74c3c}
+.tip-box{background:rgba(10,22,40,.5);border-left:3px solid rgba(201,168,76,.35);padding:10px 12px;font-size:0.88rem;color:rgba(232,201,122,.92);line-height:1.55;margin-top:8px}
+
+/* DECISIONS */
+.dec-group{margin-bottom:18px}
+.dec-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.dec-name{font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+.dec-val{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold-light);font-weight:700}
+input[type="range"]{-webkit-appearance:none;width:100%;height:3px;background:rgba(201,168,76,.2);outline:none;border-radius:2px;cursor:pointer}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;background:var(--gold);border-radius:50%;box-shadow:0 0 8px rgba(201,168,76,.5);cursor:pointer}
+.range-lbs{display:flex;justify-content:space-between;font-size:0.65rem;color:rgba(255,255,255,.35);margin-top:3px}
+.hint-text{font-size:0.72rem;color:rgba(255,255,255,.4);font-style:italic;margin-top:5px;min-height:18px;transition:color .2s}
+.hint-ok{color:rgba(46,204,113,.7)}
+.hint-warn{color:rgba(241,196,15,.75)}
+.hint-bad{color:rgba(231,76,60,.75)}
+
+/* AMENITIES */
+.amen-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:8px}
+.amen-toggle{position:relative}
+.amen-toggle input{position:absolute;opacity:0;width:0;height:0}
+.amen-lbl{
+  display:block;padding:9px 6px;text-align:center;
+  border:1px solid rgba(201,168,76,.25);cursor:pointer;
+  transition:all .2s;
+}
+.amen-lbl:hover{border-color:rgba(201,168,76,.5);background:rgba(201,168,76,.06)}
+.amen-toggle input:checked + .amen-lbl{background:rgba(201,168,76,.14);border-color:var(--gold);color:var(--gold-light)}
+.amen-icon{font-size:1.2rem;display:block;margin-bottom:3px}
+.amen-name{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:inherit}
+.amen-cost{font-size:0.62rem;color:rgba(255,255,255,.4);margin-top:2px}
+.amen-toggle input:checked + .amen-lbl .amen-cost{color:rgba(201,168,76,.6)}
+
+/* ESTIMATE BOX */
+.est-box{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.22);padding:12px;margin-top:14px}
+.est-title{font-size:0.65rem;letter-spacing:0.22em;text-transform:uppercase;color:rgba(201,168,76,.7);margin-bottom:8px}
+.est-row{display:flex;justify-content:space-between;padding:3px 0;font-size:0.88rem}
+.est-lbl{color:rgba(255,255,255,.55)}
+.est-val{font-family:'Playfair Display',serif;color:var(--cream)}
+.est-divider{border-top:1px solid rgba(201,168,76,.18);margin:6px 0}
+
+/* STATUS PANEL */
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(201,168,76,.1)}
+.sr-lbl{font-size:0.76rem;color:rgba(255,255,255,.55);letter-spacing:0.08em}
+.sr-val{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-light)}
+.occ-lbl{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px}
+.room-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.room-dot{aspect-ratio:1;background:rgba(201,168,76,.09);border:1px solid rgba(201,168,76,.18);transition:all .3s}
+.room-dot.occ{background:var(--gold);border-color:var(--gold-light);box-shadow:0 0 4px rgba(201,168,76,.4)}
+.mini-chart{height:72px;background:rgba(0,0,0,.2);display:flex;align-items:flex-end;gap:2px;padding:4px;margin-top:8px;position:relative}
+.mc-bar{flex:1;min-width:3px;transition:height .3s}
+.mc-pos{background:var(--gold)}
+.mc-neg{background:var(--red)}
+.mc-empty{color:rgba(255,255,255,.25);font-size:0.7rem;align-self:center;flex:1;text-align:center}
+
+/* BOTTOM BAR */
+.bottom-bar{background:var(--navy-mid);border-top:2px solid var(--gold);padding:14px 20px;display:flex;justify-content:center;align-items:center;gap:20px}
+.btn-run{
+  background:linear-gradient(135deg,#b8912e 0%,var(--gold-light) 50%,#b8912e 100%);
+  color:var(--navy);border:none;padding:15px 52px;
+  font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;
+  letter-spacing:0.1em;cursor:pointer;text-transform:uppercase;
+  clip-path:polygon(16px 0%,100% 0%,calc(100% - 16px) 100%,0% 100%);
+  transition:all .25s;
+}
+.btn-run:hover{transform:translateY(-2px);box-shadow:0 8px 36px rgba(201,168,76,.6)}
+.btn-run:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* RESULTS OVERLAY */
+#results-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(8,16,32,.96);z-index:100;
+  align-items:center;justify-content:center;
+}
+.result-card{
+  background:var(--navy-mid);border:2px solid var(--gold);
+  max-width:460px;width:92%;padding:32px;
+  animation:fadeUp .35s ease;position:relative;overflow:hidden;
+}
+.result-card::before{content:'◆';position:absolute;top:8px;left:8px;font-size:0.6rem;color:rgba(201,168,76,.4)}
+.result-card::after{content:'◆';position:absolute;bottom:8px;right:8px;font-size:0.6rem;color:rgba(201,168,76,.4)}
+.rc-title{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--gold);text-align:center;margin-bottom:3px}
+.rc-sub{text-align:center;font-size:0.72rem;letter-spacing:0.28em;text-transform:uppercase;color:rgba(201,168,76,.55);margin-bottom:18px}
+.rc-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid rgba(201,168,76,.12);font-size:0.95rem}
+.rc-lbl{color:rgba(255,255,255,.65)}
+.rc-val{font-family:'Playfair Display',serif;font-weight:700}
+.pos{color:var(--green)}
+.neg{color:var(--red)}
+.gold-c{color:var(--gold-light)}
+.profit-box{background:rgba(201,168,76,.09);border:1px solid rgba(201,168,76,.4);padding:14px;margin:16px 0;text-align:center}
+.pb-lbl{font-size:0.7rem;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px}
+.pb-val{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;line-height:1}
+.rc-tip{background:rgba(10,22,40,.5);border-left:3px solid var(--gold);padding:11px 14px;font-size:0.88rem;font-style:italic;color:var(--text-light);margin-bottom:16px;line-height:1.55}
+
+/* END SCREEN */
+#end-screen{
+  display:none;min-height:100vh;flex-direction:column;
+  align-items:center;justify-content:center;padding:40px 20px;
+  background:radial-gradient(ellipse at 50% 20%,#1a2e45 0%,#0a1628 70%);
+}
+.end-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;color:var(--gold);text-align:center;margin-bottom:6px}
+.end-grade{font-family:'Playfair Display',serif;font-size:clamp(4rem,12vw,6rem);font-weight:900;text-align:center;margin:12px 0;line-height:1;text-shadow:0 0 40px currentColor}
+.end-card{background:var(--navy-mid);border:2px solid var(--gold);max-width:500px;width:100%;padding:28px;animation:fadeUp .4s ease}
+.lesson-item{padding:5px 0;font-size:0.92rem;color:var(--text-light);line-height:1.5;border-bottom:1px solid rgba(201,168,76,.08)}
+.lesson-item:last-child{border-bottom:none}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* MONEY FLASH */
+.flash-pos{animation:flashGreen .5s ease}
+.flash-neg{animation:flashRed .5s ease}
+@keyframes flashGreen{0%{color:var(--gold-light)}50%{color:var(--green)}100%{color:var(--gold-light)}}
+@keyframes flashRed{0%{color:var(--gold-light)}50%{color:var(--red)}100%{color:var(--gold-light)}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     INTRO SCREEN
+════════════════════════════════════════════ -->
+<div id="intro-screen">
+  <svg class="hotel-art" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="bldGlow" cx="50%" cy="70%" r="55%">
+        <stop offset="0%" stop-color="#c9a84c" stop-opacity=".22"/>
+        <stop offset="100%" stop-color="#c9a84c" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="skyGlow" cx="50%" cy="30%" r="50%">
+        <stop offset="0%" stop-color="#1e3358" stop-opacity=".9"/>
+        <stop offset="100%" stop-color="#0a1628" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="280" height="200" fill="url(#skyGlow)"/>
+    <ellipse cx="140" cy="180" rx="130" ry="38" fill="url(#bldGlow)"/>
+    <!-- Tower -->
+    <rect x="110" y="22" width="60" height="165" fill="#162240" stroke="#c9a84c" stroke-width=".8"/>
+    <!-- Main body -->
+    <rect x="35" y="70" width="210" height="117" fill="#1e3358" stroke="#c9a84c" stroke-width=".8"/>
+    <!-- Tower top -->
+    <polygon points="140,4 108,22 172,22" fill="#c9a84c" opacity=".85"/>
+    <!-- Tower flag -->
+    <line x1="140" y1="4" x2="140" y2="0" stroke="#c9a84c" stroke-width="1"/>
+    <!-- Tower windows -->
+    <rect x="124" y="30" width="14" height="18" fill="#c9a84c" opacity=".4"/>
+    <rect x="142" y="30" width="14" height="18" fill="#c9a84c" opacity=".9"/>
+    <rect x="124" y="52" width="14" height="18" fill="#c9a84c" opacity=".75"/>
+    <rect x="142" y="52" width="14" height="18" fill="#c9a84c" opacity=".35"/>
+    <!-- Main windows row 1 -->
+    <rect x="48"  y="82" width="16" height="20" fill="#c9a84c" opacity=".7"/>
+    <rect x="74"  y="82" width="16" height="20" fill="#c9a84c" opacity=".3"/>
+    <rect x="100" y="82" width="16" height="20" fill="#c9a84c" opacity=".9"/>
+    <rect x="164" y="82" width="16" height="20" fill="#c9a84c" opacity=".55"/>
+    <rect x="190" y="82" width="16" height="20" fill="#c9a84c" opacity=".8"/>
+    <rect x="216" y="82" width="16" height="20" fill="#c9a84c" opacity=".25"/>
+    <!-- Main windows row 2 -->
+    <rect x="48"  y="112" width="16" height="20" fill="#c9a84c" opacity=".35"/>
+    <rect x="74"  y="112" width="16" height="20" fill="#c9a84c" opacity=".85"/>
+    <rect x="100" y="112" width="16" height="20" fill="#c9a84c" opacity=".5"/>
+    <rect x="164" y="112" width="16" height="20" fill="#c9a84c" opacity=".9"/>
+    <rect x="190" y="112" width="16" height="20" fill="#c9a84c" opacity=".4"/>
+    <rect x="216" y="112" width="16" height="20" fill="#c9a84c" opacity=".7"/>
+    <!-- Main windows row 3 -->
+    <rect x="48"  y="142" width="16" height="20" fill="#c9a84c" opacity=".6"/>
+    <rect x="74"  y="142" width="16" height="20" fill="#c9a84c" opacity=".4"/>
+    <rect x="100" y="142" width="16" height="20" fill="#c9a84c" opacity=".8"/>
+    <rect x="164" y="142" width="16" height="20" fill="#c9a84c" opacity=".3"/>
+    <rect x="190" y="142" width="16" height="20" fill="#c9a84c" opacity=".9"/>
+    <rect x="216" y="142" width="16" height="20" fill="#c9a84c" opacity=".5"/>
+    <!-- Entrance -->
+    <polygon points="100,168 180,168 188,180 92,180" fill="#c9a84c" opacity=".65"/>
+    <rect x="112" y="168" width="56" height="19" fill="#0a1628" stroke="#c9a84c" stroke-width=".7"/>
+    <line x1="140" y1="168" x2="140" y2="187" stroke="#c9a84c" stroke-width=".5" opacity=".5"/>
+    <!-- Pillars -->
+    <rect x="103" y="158" width="5" height="30" fill="#c9a84c" opacity=".45"/>
+    <rect x="172" y="158" width="5" height="30" fill="#c9a84c" opacity=".45"/>
+    <!-- Ground glow -->
+    <ellipse cx="118" cy="188" rx="20" ry="3" fill="#c9a84c" opacity=".18"/>
+    <ellipse cx="162" cy="188" rx="20" ry="3" fill="#c9a84c" opacity=".18"/>
+  </svg>
+
+  <div class="intro-title">Hotel Magnifique</div>
+  <div class="intro-sub">El Arte de la Hospitalidad</div>
+  <div class="gold-line"></div>
+  <div class="intro-desc">
+    Dirige tu propio hotel de lujo durante <strong style="color:var(--gold-light)">30 días</strong>.
+    Aprende a gestionar precios, personal y servicios para maximizar ganancias y conquistar las 5 estrellas.
+  </div>
+  <div class="intro-badges">
+    <span class="intro-badge">🏨 20 Habitaciones</span>
+    <span class="intro-badge">📅 30 Días</span>
+    <span class="intro-badge">💰 $5,000 de capital</span>
+    <span class="intro-badge">⭐ Meta: 5 Estrellas</span>
+  </div>
+  <div class="gold-line"></div>
+  <button class="btn-gold" onclick="startGame()">✦ Comenzar la Aventura ✦</button>
+</div>
+
+<!-- ══════════════════════════════════════════
+     GAME SCREEN
+════════════════════════════════════════════ -->
+<div id="game-screen">
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="hotel-logo">
+      ✦ Hotel Magnifique
+      <span id="season-lbl">Primavera 🌸</span>
+    </div>
+    <div class="top-stats">
+      <div class="stat-chip">
+        <div class="sc-label">Día</div>
+        <div class="sc-value" id="day-disp">1 / 30</div>
+      </div>
+      <div class="stat-chip">
+        <div class="sc-label">Capital</div>
+        <div class="sc-value" id="money-disp">$5,000</div>
+      </div>
+      <div class="stat-chip">
+        <div class="sc-label">Reputación</div>
+        <div class="sc-value" id="stars-disp">⭐⭐⭐☆☆</div>
+      </div>
+      <div class="stat-chip">
+        <div class="sc-label">Ganancia total</div>
+        <div class="sc-value" id="profit-total-disp">$0</div>
+      </div>
+    </div>
+    <div class="day-bar"><div class="day-bar-fill" id="day-bar-fill" style="width:3.3%"></div></div>
+  </div>
+
+  <!-- MAIN PANELS -->
+  <div class="game-main">
+
+    <!-- PANEL 1: FORECAST -->
+    <div class="panel">
+      <div class="panel-title">◆ Pronóstico del Día</div>
+
+      <div class="fc-item">
+        <div class="fc-lbl">Temporada</div>
+        <div class="fc-val" id="f-season">Primavera 🌸</div>
+      </div>
+
+      <div class="fc-item">
+        <div class="fc-lbl">Evento especial</div>
+        <div class="fc-val" id="f-event">Día Normal ☁️</div>
+        <div class="fc-desc" id="f-event-desc">Un día tranquilo.</div>
+      </div>
+
+      <div class="fc-item">
+        <div class="fc-lbl">Demanda estimada</div>
+        <div><span class="demand-badge d-media" id="f-demand">MEDIA</span></div>
+      </div>
+
+      <div class="tip-box" id="f-tip">
+        Ajusta tu precio según la temporada y el evento del día.
+      </div>
+    </div>
+
+    <!-- PANEL 2: DECISIONS -->
+    <div class="panel">
+      <div class="panel-title">◆ Tus Decisiones de Hoy</div>
+
+      <!-- Price -->
+      <div class="dec-group">
+        <div class="dec-label">
+          <span class="dec-name">🏷️ Precio por noche</span>
+          <span class="dec-val" id="price-disp">$120</span>
+        </div>
+        <input type="range" id="price-sl" min="40" max="500" value="120" step="5" oninput="onSlider()">
+        <div class="range-lbs"><span>$40 (Económico)</span><span>$500 (Premium)</span></div>
+        <div class="hint-text" id="price-hint">Precio moderado.</div>
+      </div>
+
+      <!-- Staff -->
+      <div class="dec-group">
+        <div class="dec-label">
+          <span class="dec-name">👨‍💼 Personal ($130/persona/día)</span>
+          <span class="dec-val" id="staff-disp">4 personas</span>
+        </div>
+        <input type="range" id="staff-sl" min="1" max="12" value="4" step="1" oninput="onSlider()">
+        <div class="range-lbs"><span>1</span><span>12</span></div>
+        <div class="hint-text">Ideal: 1 empleado por cada 4-5 huéspedes.</div>
+      </div>
+
+      <!-- Marketing -->
+      <div class="dec-group">
+        <div class="dec-label">
+          <span class="dec-name">📢 Presupuesto de marketing</span>
+          <span class="dec-val" id="mkt-disp">$100</span>
+        </div>
+        <input type="range" id="mkt-sl" min="0" max="500" value="100" step="25" oninput="onSlider()">
+        <div class="range-lbs"><span>$0</span><span>$500</span></div>
+        <div class="hint-text">Más marketing = más huéspedes potenciales.</div>
+      </div>
+
+      <!-- Amenities -->
+      <div class="dec-group">
+        <div class="dec-name" style="margin-bottom:8px;font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">🛎️ Servicios adicionales</div>
+        <div class="amen-grid">
+          <div class="amen-toggle">
+            <input type="checkbox" id="cb-breakfast" onchange="onSlider()">
+            <label class="amen-lbl" for="cb-breakfast">
+              <span class="amen-icon">🍳</span>
+              <span class="amen-name">Desayuno</span>
+              <span class="amen-cost">+$8/hab neto</span>
+            </label>
+          </div>
+          <div class="amen-toggle">
+            <input type="checkbox" id="cb-pool" onchange="onSlider()">
+            <label class="amen-lbl" for="cb-pool">
+              <span class="amen-icon">🏊</span>
+              <span class="amen-name">Piscina</span>
+              <span class="amen-cost">$70/día fijo</span>
+            </label>
+          </div>
+          <div class="amen-toggle">
+            <input type="checkbox" id="cb-spa" onchange="onSlider()">
+            <label class="amen-lbl" for="cb-spa">
+              <span class="amen-icon">💆</span>
+              <span class="amen-name">Spa</span>
+              <span class="amen-cost">$100/día fijo</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estimate -->
+      <div class="est-box">
+        <div class="est-title">◆ Estimación del día</div>
+        <div class="est-row"><span class="est-lbl">Habitaciones estimadas</span><span class="est-val" id="est-rooms">~10</span></div>
+        <div class="est-row"><span class="est-lbl">Ingresos estimados</span><span class="est-val" id="est-rev">~$1,400</span></div>
+        <div class="est-row"><span class="est-lbl">Gastos estimados</span><span class="est-val" id="est-exp">~$880</span></div>
+        <div class="est-divider"></div>
+        <div class="est-row"><span class="est-lbl" style="font-weight:600;color:var(--cream)">Balance estimado</span><span class="est-val" id="est-profit" style="color:var(--gold-light)">~$520</span></div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: STATUS -->
+    <div class="panel">
+      <div class="panel-title">◆ Estado del Hotel</div>
+
+      <div class="occ-lbl">Habitaciones (día anterior)</div>
+      <div class="room-grid" id="room-grid"></div>
+
+      <div class="stat-row" style="margin-top:12px">
+        <span class="sr-lbl">Ocupación ayer</span>
+        <span class="sr-val" id="sr-occ">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="sr-lbl">Ingresos ayer</span>
+        <span class="sr-val" id="sr-rev">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="sr-lbl">Ganancia ayer</span>
+        <span class="sr-val" id="sr-profit">—</span>
+      </div>
+      <div class="stat-row">
+        <span class="sr-lbl">Reputación</span>
+        <span class="sr-val" id="sr-rep">3.0 ⭐⭐⭐☆☆</span>
+      </div>
+
+      <div style="margin-top:14px">
+        <div class="occ-lbl">Historial de ganancias</div>
+        <div class="mini-chart" id="mini-chart">
+          <div class="mc-empty">Sin datos aún</div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(201,168,76,.15)">
+        <div class="occ-lbl">Acumulado del mes</div>
+        <div class="stat-row">
+          <span class="sr-lbl">Total ingresos</span>
+          <span class="sr-val" id="acc-rev">$0</span>
+        </div>
+        <div class="stat-row">
+          <span class="sr-lbl">Total gastos</span>
+          <span class="sr-val" id="acc-exp">$0</span>
+        </div>
+        <div class="stat-row">
+          <span class="sr-lbl">Mejor día</span>
+          <span class="sr-val" id="best-day">—</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.game-main -->
+
+  <!-- BOTTOM RUN BUTTON -->
+  <div class="bottom-bar">
+    <button class="btn-run" id="run-btn" onclick="runDay()">
+      🏨 &nbsp;Abrir el Hotel — Día <span id="btn-day-num">1</span>
+    </button>
+  </div>
+</div><!-- /#game-screen -->
+
+<!-- ══════════════════════════════════════════
+     RESULTS OVERLAY
+════════════════════════════════════════════ -->
+<div id="results-overlay">
+  <div class="result-card">
+    <div class="rc-title" id="rc-title">Informe del Día 1</div>
+    <div class="rc-sub">Resumen de operaciones</div>
+    <div class="gold-line" style="margin-bottom:14px"></div>
+
+    <div class="rc-row"><span class="rc-lbl">🛏️ Habitaciones ocupadas</span><span class="rc-val gold-c" id="rc-rooms">—</span></div>
+    <div class="rc-row"><span class="rc-lbl">📈 Tasa de ocupación</span><span class="rc-val gold-c" id="rc-occ">—</span></div>
+    <div class="rc-row"><span class="rc-lbl">💵 Ingresos</span><span class="rc-val pos" id="rc-rev">—</span></div>
+    <div class="rc-row"><span class="rc-lbl">📉 Gastos</span><span class="rc-val neg" id="rc-exp">—</span></div>
+    <div class="rc-row"><span class="rc-lbl">⭐ Reputación</span><span class="rc-val" id="rc-rep">—</span></div>
+
+    <div class="profit-box">
+      <div class="pb-lbl">Balance del día</div>
+      <div class="pb-val" id="rc-profit">$0</div>
+    </div>
+
+    <div class="rc-tip" id="rc-tip">Buen trabajo hoy.</div>
+
+    <div style="text-align:center">
+      <button class="btn-gold" id="next-btn" onclick="nextDay()">Día 2 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     END SCREEN
+════════════════════════════════════════════ -->
+<div id="end-screen">
+  <div class="end-title" id="end-title">¡Temporada Completada!</div>
+  <div class="gold-line"></div>
+  <div class="end-grade" id="end-grade">A</div>
+  <div class="end-card">
+    <div id="end-stats"></div>
+    <div class="gold-line" style="margin:16px 0"></div>
+    <div style="font-size:0.7rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(201,168,76,.7);margin-bottom:10px">💡 Lecciones aprendidas</div>
+    <div id="end-lessons"></div>
+    <div style="text-align:center;margin-top:22px">
+      <button class="btn-gold" onclick="restartGame()">✦ Jugar de Nuevo ✦</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════
+const DAYS_TOTAL  = 30;
+const ROOMS_TOTAL = 20;
+const OVERHEAD    = 180;   // fixed daily cost
+const STAFF_COST  = 130;   // per employee per day
+const POOL_COST   = 70;    // fixed daily
+const SPA_COST    = 100;   // fixed daily
+const BKF_COST    = 14;    // per occupied room
+
+const SEASONS = [
+  {from:1, to:7,  name:'Primavera 🌸', factor:0.62},
+  {from:8, to:15, name:'Verano ☀️',    factor:0.88},
+  {from:16,to:22, name:'Otoño 🍂',     factor:0.65},
+  {from:23,to:30, name:'Invierno ❄️',  factor:0.43},
+];
+
+const EVENTS = [
+  {name:'Congreso Internacional 🎤', desc:'Gran congreso en la ciudad. Alta demanda de habitaciones.',         mod:1.50, prob:.11, tip:'Sube el precio: la demanda está disparada hoy.'},
+  {name:'Feria de Negocios 💼',      desc:'Ejecutivos de todo el país buscan alojamiento premium.',            mod:1.40, prob:.09, tip:'Los ejecutivos valoran el spa. ¡Actívalo!'},
+  {name:'Fin de Semana Largo 🏖️',   desc:'Muchas familias aprovechan el fin de semana extendido.',            mod:1.30, prob:.17, tip:'Las familias valoran la piscina. Considera activarla.'},
+  {name:'Festival de la Ciudad 🎡',  desc:'Un festival local atrae turistas de toda la región.',               mod:1.25, prob:.13, tip:'Buen momento para ofrecer el desayuno incluido.'},
+  {name:'Tormenta ⛈️',              desc:'El mal tiempo reduce significativamente la afluencia de viajeros.', mod:0.58, prob:.08, tip:'Baja el precio: los pocos viajeros buscan gangas.'},
+  {name:'Obras en la Ciudad 🚧',     desc:'Las obras dificultan el acceso al hotel y ahuyentan clientes.',     mod:0.72, prob:.09, tip:'Invierte en marketing para compensar la baja visibilidad.'},
+  {name:'Día Normal ☁️',            desc:'Un día tranquilo sin eventos especiales. Demanda habitual.',         mod:1.00, prob:.33, tip:'Mantén precios acordes a la temporada y tu reputación.'},
+];
+
+// ═══════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════
+let G = {};
+
+function initState() {
+  G = {
+    day: 1, money: 5000, reputation: 3.0,
+    totalProfit: 0, totalRevenue: 0, totalExpenses: 0,
+    history: [], bestDay: null, lastOccupied: 0,
+    // decisions
+    price: 120, staff: 4, marketing: 100,
+    breakfast: false, pool: false, spa: false,
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+let todaySeason, todayEvent;
+
+function getSeason(day) {
+  return SEASONS.find(s => day >= s.from && day <= s.to) || SEASONS[3];
+}
+
+function pickEvent() {
+  let r = Math.random(), cum = 0;
+  for (const e of EVENTS) { cum += e.prob; if (r < cum) return e; }
+  return EVENTS[EVENTS.length - 1];
+}
+
+function fmtM(n)  { return '$' + Math.round(n).toLocaleString('es-ES'); }
+function fmtSgn(n){ return (n>=0?'+':'')+fmtM(n); }
+
+function stars(rep) {
+  const f = Math.floor(rep), h = (rep-f >= 0.5 ? 1 : 0), e = 5-f-h;
+  return '⭐'.repeat(f) + (h?'✨':'') + '☆'.repeat(e);
+}
+
+function demandBadge(raw) {
+  if (raw > .78) return ['MUY ALTA','d-muy-alta'];
+  if (raw > .58) return ['ALTA','d-alta'];
+  if (raw > .40) return ['MEDIA','d-media'];
+  if (raw > .24) return ['BAJA','d-baja'];
+  return ['MUY BAJA','d-muy-baja'];
+}
+
+// ═══════════════════════════════════════════════════
+//  CORE SIMULATION
+// ═══════════════════════════════════════════════════
+function simulate(decisions, season, event, addNoise) {
+  const {price, staff, marketing, breakfast, pool, spa} = decisions;
+  const rep = G.reputation;
+
+  // 1. Base demand
+  let demand = season.factor * event.mod * (0.74 + rep * 0.085);
+
+  // 2. Optimal price (varies with season & reputation)
+  const optPrice = (55 + rep * 22) * (0.55 + season.factor * 0.88);
+
+  // 3. Price factor
+  const ratio = price / optPrice;
+  let pf;
+  if      (ratio < 0.60) pf = 1.14;
+  else if (ratio < 0.85) pf = 1.06;
+  else if (ratio < 1.10) pf = 1.00;
+  else if (ratio < 1.35) pf = 0.87;
+  else if (ratio < 1.65) pf = 0.68;
+  else if (ratio < 2.00) pf = 0.48;
+  else                   pf = 0.28;
+
+  // 4. Marketing factor
+  const mf = 1.0 + (marketing / 500) * 0.28;
+
+  // 5. Amenity factor
+  let af = 1.0;
+  if (breakfast) af += 0.08;
+  if (pool)      af += 0.11;
+  if (spa)       af += 0.13;
+
+  let occupancy = Math.max(0.02, Math.min(1.0, demand * pf * mf * af));
+
+  // Add small random noise for actual simulation
+  if (addNoise) {
+    occupancy = Math.max(0.02, Math.min(1.0, occupancy + (Math.random()-0.5)*0.08));
+  }
+
+  const roomsOccupied = Math.round(occupancy * ROOMS_TOTAL);
+
+  // Revenue
+  let rpr = price;
+  if (breakfast) rpr += 22;
+  if (pool)      rpr += 18;
+  if (spa)       rpr += 35;
+  const revenue  = roomsOccupied * rpr;
+
+  // Expenses
+  let expenses = OVERHEAD + staff * STAFF_COST + marketing;
+  if (breakfast) expenses += roomsOccupied * BKF_COST;
+  if (pool)      expenses += POOL_COST;
+  if (spa)       expenses += SPA_COST;
+
+  const profit = revenue - expenses;
+
+  // Reputation change
+  let rc = 0;
+  const sr = roomsOccupied > 0 ? staff / roomsOccupied : 2;
+  if      (sr >= 0.35) rc += 0.08;
+  else if (sr >= 0.20) rc += 0.02;
+  else if (sr < 0.15)  rc -= 0.15;
+
+  if (price > 200 && !spa && !pool && rep < 3.5) rc -= 0.07;
+  if (price > 150 && breakfast && pool)          rc += 0.04;
+  if (occupancy > 0.90 && sr < 0.18)            rc -= 0.12;
+
+  if (addNoise) rc += (Math.random()-0.5) * 0.08;
+
+  const newRep = Math.max(1.0, Math.min(5.0, rep + rc));
+
+  return {roomsOccupied, occupancy, revenue, expenses, profit, newRep, repChange: rc, optPrice};
+}
+
+// ═══════════════════════════════════════════════════
+//  UI UPDATE
+// ═══════════════════════════════════════════════════
+function setupDay() {
+  todaySeason = getSeason(G.day);
+  todayEvent  = pickEvent();
+
+  // Forecast panel
+  document.getElementById('f-season').textContent     = todaySeason.name;
+  document.getElementById('season-lbl').textContent   = todaySeason.name;
+  document.getElementById('f-event').textContent      = todayEvent.name;
+  document.getElementById('f-event-desc').textContent = todayEvent.desc;
+  document.getElementById('f-tip').textContent        = todayEvent.tip;
+
+  const rawD = todaySeason.factor * todayEvent.mod * (0.74 + G.reputation * 0.085);
+  const [dlbl, dcls] = demandBadge(rawD);
+  const db = document.getElementById('f-demand');
+  db.textContent = dlbl; db.className = 'demand-badge ' + dcls;
+
+  // Top bar
+  document.getElementById('day-disp').textContent   = G.day + ' / ' + DAYS_TOTAL;
+  document.getElementById('btn-day-num').textContent = G.day;
+  document.getElementById('day-bar-fill').style.width = ((G.day-1)/DAYS_TOTAL*100) + '%';
+  refreshMoneyDisplay();
+  refreshRepDisplay();
+
+  // Status panel defaults for day 1
+  buildRoomGrid(G.lastOccupied);
+  updateEstimate();
+}
+
+function refreshMoneyDisplay() {
+  const el = document.getElementById('money-disp');
+  el.textContent = fmtM(G.money);
+  el.className   = G.money < 400 ? 'sc-value warn' : 'sc-value';
+
+  const tp = document.getElementById('profit-total-disp');
+  tp.textContent = fmtSgn(G.totalProfit);
+  tp.style.color = G.totalProfit >= 0 ? 'var(--gold-light)' : 'var(--red)';
+}
+
+function refreshRepDisplay() {
+  document.getElementById('stars-disp').textContent = stars(G.reputation);
+  document.getElementById('sr-rep').textContent     = G.reputation.toFixed(1) + ' ' + stars(G.reputation);
+}
+
+function buildRoomGrid(occupied) {
+  const grid = document.getElementById('room-grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < ROOMS_TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'room-dot' + (i < occupied ? ' occ' : '');
+    grid.appendChild(d);
+  }
+}
+
+function updateMiniChart() {
+  const chart = document.getElementById('mini-chart');
+  if (!G.history.length) return;
+  chart.innerHTML = '';
+  const profits = G.history.map(h => h.profit);
+  const maxAbs  = Math.max(...profits.map(Math.abs), 1);
+  profits.forEach(p => {
+    const bar = document.createElement('div');
+    bar.className = 'mc-bar ' + (p >= 0 ? 'mc-pos' : 'mc-neg');
+    bar.style.height = Math.max(3, Math.abs(p)/maxAbs*100) + '%';
+    bar.title = fmtSgn(p);
+    chart.appendChild(bar);
+  });
+}
+
+function onSlider() {
+  G.price     = parseInt(document.getElementById('price-sl').value);
+  G.staff     = parseInt(document.getElementById('staff-sl').value);
+  G.marketing = parseInt(document.getElementById('mkt-sl').value);
+  G.breakfast = document.getElementById('cb-breakfast').checked;
+  G.pool      = document.getElementById('cb-pool').checked;
+  G.spa       = document.getElementById('cb-spa').checked;
+
+  document.getElementById('price-disp').textContent = fmtM(G.price);
+  document.getElementById('staff-disp').textContent = G.staff + (G.staff > 1 ? ' personas' : ' persona');
+  document.getElementById('mkt-disp').textContent   = fmtM(G.marketing);
+
+  // Price hint
+  if (todaySeason && todayEvent) {
+    const {optPrice} = simulate(G, todaySeason, todayEvent, false);
+    const ratio = G.price / optPrice;
+    const hint  = document.getElementById('price-hint');
+    if      (ratio < 0.70) { hint.textContent = '⚠️ Precio muy bajo. Perderás ingresos por habitación.'; hint.className = 'hint-text hint-warn'; }
+    else if (ratio < 0.90) { hint.textContent = '✓ Precio atractivo. Alta ocupación esperada.';          hint.className = 'hint-text hint-ok'; }
+    else if (ratio < 1.15) { hint.textContent = '✓ Precio óptimo para las condiciones actuales.';        hint.className = 'hint-text hint-ok'; }
+    else if (ratio < 1.45) { hint.textContent = '⚠️ Precio algo alto. Reducirá la ocupación.';           hint.className = 'hint-text hint-warn'; }
+    else                   { hint.textContent = '⛔ Precio excesivo. Muy pocos huéspedes.';              hint.className = 'hint-text hint-bad'; }
+  }
+
+  updateEstimate();
+}
+
+function updateEstimate() {
+  if (!todaySeason || !todayEvent) return;
+  const r = simulate(G, todaySeason, todayEvent, false);
+  document.getElementById('est-rooms').textContent = '~' + r.roomsOccupied;
+  document.getElementById('est-rev').textContent   = '~' + fmtM(r.revenue);
+  document.getElementById('est-exp').textContent   = '~' + fmtM(r.expenses);
+  const ep = document.getElementById('est-profit');
+  ep.textContent = '~' + fmtSgn(r.profit);
+  ep.style.color = r.profit >= 0 ? 'var(--gold-light)' : 'var(--red)';
+}
+
+// ═══════════════════════════════════════════════════
+//  GAME FLOW
+// ═══════════════════════════════════════════════════
+function startGame() {
+  initState();
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display  = 'flex';
+  document.getElementById('game-screen').style.flexDirection = 'column';
+  buildRoomGrid(0);
+  setupDay();
+}
+
+function runDay() {
+  document.getElementById('run-btn').disabled = true;
+
+  const result = simulate(G, todaySeason, todayEvent, true);
+
+  // Update state
+  const oldRep   = G.reputation;
+  G.money        += result.profit;
+  G.reputation    = result.newRep;
+  G.totalProfit  += result.profit;
+  G.totalRevenue += result.revenue;
+  G.totalExpenses+= result.expenses;
+  G.lastOccupied  = result.roomsOccupied;
+  G.history.push({profit:result.profit, revenue:result.revenue, expenses:result.expenses, rooms:result.roomsOccupied, occ:result.occupancy});
+  if (!G.bestDay || result.profit > G.bestDay.profit) G.bestDay = {day:G.day, profit:result.profit};
+
+  // Update status panel
+  const sr     = G.staff / (result.roomsOccupied || 1);
+  document.getElementById('sr-occ').textContent    = result.roomsOccupied + '/20 (' + Math.round(result.occupancy*100) + '%)';
+  document.getElementById('sr-rev').textContent    = fmtM(result.revenue);
+  const spEl = document.getElementById('sr-profit');
+  spEl.textContent = fmtSgn(result.profit);
+  spEl.style.color = result.profit >= 0 ? 'var(--gold-light)' : 'var(--red)';
+  document.getElementById('acc-rev').textContent   = fmtM(G.totalRevenue);
+  document.getElementById('acc-exp').textContent   = fmtM(G.totalExpenses);
+  if (G.bestDay) document.getElementById('best-day').textContent = 'Día ' + G.bestDay.day + ': ' + fmtSgn(G.bestDay.profit);
+  buildRoomGrid(result.roomsOccupied);
+  updateMiniChart();
+  refreshMoneyDisplay();
+  refreshRepDisplay();
+
+  showResults(result, oldRep);
+}
+
+function showResults(res, oldRep) {
+  document.getElementById('rc-title').textContent = 'Informe del Día ' + G.day;
+  document.getElementById('rc-rooms').textContent = res.roomsOccupied + ' / ' + ROOMS_TOTAL;
+  document.getElementById('rc-occ').textContent   = Math.round(res.occupancy*100) + '%';
+  document.getElementById('rc-rev').textContent   = fmtM(res.revenue);
+  document.getElementById('rc-exp').textContent   = fmtM(res.expenses);
+
+  const repEl = document.getElementById('rc-rep');
+  const rc = res.newRep - oldRep;
+  if      (rc >  0.04) { repEl.textContent = '⬆️ ' + oldRep.toFixed(1) + ' → ' + res.newRep.toFixed(1) + ' ' + stars(res.newRep); repEl.className = 'rc-val pos'; }
+  else if (rc < -0.04) { repEl.textContent = '⬇️ ' + oldRep.toFixed(1) + ' → ' + res.newRep.toFixed(1) + ' ' + stars(res.newRep); repEl.className = 'rc-val neg'; }
+  else                 { repEl.textContent = '— ' + res.newRep.toFixed(1) + ' ' + stars(res.newRep);                                repEl.className = 'rc-val gold-c'; }
+
+  const pEl = document.getElementById('rc-profit');
+  pEl.textContent = fmtSgn(res.profit);
+  pEl.className   = 'pb-val ' + (res.profit >= 0 ? 'pos' : 'neg');
+
+  document.getElementById('rc-tip').textContent = getFeedback(res);
+
+  // Next button text
+  const nb = document.getElementById('next-btn');
+  if (G.money <= 0)          nb.textContent = 'Ver Resultados Finales';
+  else if (G.day >= DAYS_TOTAL) nb.textContent = '🏆 Ver Resultados Finales';
+  else                          nb.textContent = 'Día ' + (G.day+1) + ' →';
+
+  document.getElementById('results-overlay').style.display = 'flex';
+}
+
+function getFeedback(res) {
+  const occ = res.occupancy;
+  const sr  = G.staff / (res.roomsOccupied || 1);
+  if (G.money <= 0)                            return '💸 El hotel se ha quedado sin capital. Los gastos fijos se pagan aunque no haya huéspedes. ¡Controla siempre tus costos!';
+  if (res.profit < -600)                       return '⚠️ Pérdidas importantes. El personal y los servicios cuestan aunque las habitaciones estén vacías. Reduce gastos cuando la demanda es baja.';
+  if (occ < 0.20)                              return '📊 Muy poca ocupación hoy. Prueba a bajar el precio o invertir más en marketing para atraer huéspedes.';
+  if (occ > 0.88 && sr < 0.15)                return '⚠️ Hotel lleno pero poco personal. Los huéspedes insatisfechos dañan la reputación. En alta ocupación: contrata más staff.';
+  if (occ > 0.80 && res.profit > 600)         return '🌟 ¡Día brillante! Alta ocupación y gran beneficio. Tus decisiones fueron excelentes.';
+  if (G.staff * STAFF_COST > res.revenue*0.45) return '💡 El costo de personal es muy elevado respecto a los ingresos. Ajusta el número de empleados según la ocupación esperada.';
+  if (res.profit > 0 && occ > 0.55)           return '✅ Buen equilibrio entre precio, ocupación y gastos. ¡Sigue así!';
+  return '💼 Sigue ajustando tus decisiones. Observa la temporada y los eventos para optimizar precios.';
+}
+
+function nextDay() {
+  document.getElementById('results-overlay').style.display = 'none';
+
+  if (G.money <= 0 || G.day >= DAYS_TOTAL) {
+    showEndScreen(G.money <= 0);
+    return;
+  }
+
+  G.day++;
+  document.getElementById('run-btn').disabled = false;
+  // Sync sliders with current state
+  document.getElementById('price-sl').value      = G.price;
+  document.getElementById('staff-sl').value      = G.staff;
+  document.getElementById('mkt-sl').value        = G.marketing;
+  document.getElementById('cb-breakfast').checked = G.breakfast;
+  document.getElementById('cb-pool').checked      = G.pool;
+  document.getElementById('cb-spa').checked       = G.spa;
+  setupDay();
+}
+
+function showEndScreen(bankrupt) {
+  document.getElementById('game-screen').style.display   = 'none';
+  document.getElementById('end-screen').style.display    = 'flex';
+  document.getElementById('end-screen').style.flexDirection = 'column';
+
+  const daysPlayed = G.history.length;
+  const avgOcc = G.history.reduce((a,b) => a+b.occ, 0) / daysPlayed;
+  const finalMoney = G.money;
+  const rep = G.reputation;
+
+  let grade, gradeColor, title, assessment;
+
+  if (bankrupt) {
+    grade='💸'; gradeColor='var(--red)'; title='Quiebra Hotelera';
+    assessment = 'El hotel se quedó sin capital en el día ' + daysPlayed + '. Los gastos fijos se pagan aunque no haya clientes. La clave: nunca gastar más de lo que ingresa.';
+  } else {
+    const score = (G.totalProfit/1000)*0.4 + rep*12 + avgOcc*22;
+    if      (score>=85 && rep>=4.5) { grade='S'; gradeColor='#f1c40f'; title='¡Maestro de la Hospitalidad!'; assessment='Has dominado el arte hotelero. Ganancias sobresalientes y reputación de 5 estrellas.' }
+    else if (score>=65 && rep>=3.8) { grade='A'; gradeColor='#2ecc71'; title='Hotel de Primera Clase';       assessment='Un mes sólido y rentable. Tu hotel combina bien ingresos y calidad de servicio.' }
+    else if (score>=45)             { grade='B'; gradeColor='#3498db'; title='Gestión Competente';           assessment='Resultado correcto. Mejora la gestión de precios dinámicos para próximas temporadas.' }
+    else if (score>=25)             { grade='C'; gradeColor='#e67e22'; title='Dirección con Potencial';      assessment='El hotel sobrevivió pero hay mucho margen. Aprende a leer la demanda y ajustar precios.' }
+    else                            { grade='D'; gradeColor='var(--red)'; title='Gestión Deficiente';       assessment='El hotel tuvo graves dificultades. Recuerda: controla costos fijos y nunca pagues más de lo que ganas.' }
+  }
+
+  document.getElementById('end-title').textContent = title;
+  const eg = document.getElementById('end-grade');
+  eg.textContent = grade; eg.style.color = gradeColor;
+
+  document.getElementById('end-stats').innerHTML = `
+    <div class="stat-row"><span class="sr-lbl">💰 Capital final</span><span class="sr-val ${finalMoney>=5000?'pos':'neg'}">${fmtM(finalMoney)}</span></div>
+    <div class="stat-row"><span class="sr-lbl">📈 Ganancia/pérdida total</span><span class="sr-val ${G.totalProfit>=0?'pos':'neg'}">${fmtSgn(G.totalProfit)}</span></div>
+    <div class="stat-row"><span class="sr-lbl">⭐ Reputación final</span><span class="sr-val" style="color:var(--gold-light)">${rep.toFixed(1)} ${stars(rep)}</span></div>
+    <div class="stat-row"><span class="sr-lbl">🏨 Ocupación media</span><span class="sr-val" style="color:var(--gold-light)">${Math.round(avgOcc*100)}%</span></div>
+    <div class="stat-row"><span class="sr-lbl">📅 Días jugados</span><span class="sr-val" style="color:var(--gold-light)">${daysPlayed} / 30</span></div>
+    ${G.bestDay?`<div class="stat-row"><span class="sr-lbl">🏆 Mejor día</span><span class="sr-val" style="color:var(--gold-light)">Día ${G.bestDay.day}: ${fmtSgn(G.bestDay.profit)}</span></div>`:''}
+    <div style="margin-top:14px;padding:14px;background:rgba(201,168,76,.09);border:1px solid rgba(201,168,76,.35);font-size:.95rem;color:var(--cream);line-height:1.6">${assessment}</div>
+  `;
+
+  const lessons = [
+    '<em>Yield management</em>: sube los precios cuando hay alta demanda, bájalos en temporada baja.',
+    'El personal debe ser proporcional a la ocupación (1 por cada 4-5 huéspedes).',
+    'Los servicios (spa, piscina) tienen costo fijo diario — actívalos solo si justifican el gasto.',
+    'La reputación es un activo a largo plazo: cuídala y podrás cobrar más.',
+    'El marketing tiene rendimientos decrecientes: los primeros $100 son los más efectivos.',
+    'Los costos fijos se pagan siempre — en baja ocupación, reduce personal y servicios.',
+  ];
+
+  document.getElementById('end-lessons').innerHTML =
+    lessons.map(l => `<div class="lesson-item">• ${l}</div>`).join('');
+}
+
+function restartGame() {
+  document.getElementById('end-screen').style.display   = 'none';
+  document.getElementById('intro-screen').style.display = 'flex';
+  document.getElementById('intro-screen').style.flexDirection = 'column';
+}
+
+// Init
+window.onload = () => buildRoomGrid(0);
+</script>
+</body>
+</html>

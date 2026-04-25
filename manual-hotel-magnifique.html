@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manual del Jugador — Hotel Magnifique</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a1628;--navy-mid:#162240;--navy-light:#1e3358;
+  --gold:#c9a84c;--gold-light:#e8c97a;--cream:#faf6ee;
+  --green:#27ae60;--red:#c0392b;--text:#2a2a2a;
+}
+body{
+  font-family:'Cormorant Garamond',Georgia,serif;
+  background:var(--cream);color:var(--text);
+  font-size:1.05rem;line-height:1.75;
+}
+
+/* COVER */
+.cover{
+  background:linear-gradient(160deg,var(--navy) 0%,var(--navy-mid) 60%,#0f1e35 100%);
+  color:white;padding:80px 40px 60px;text-align:center;position:relative;overflow:hidden;
+}
+.cover::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent,transparent 60px,rgba(201,168,76,.025) 60px,rgba(201,168,76,.026) 61px);
+}
+.cover-inner{position:relative;z-index:1;max-width:680px;margin:0 auto}
+.cover-badge{
+  display:inline-block;background:rgba(201,168,76,.15);
+  border:1px solid rgba(201,168,76,.5);color:var(--gold-light);
+  font-size:0.75rem;letter-spacing:0.3em;text-transform:uppercase;
+  padding:6px 20px;margin-bottom:24px;
+}
+.cover-title{
+  font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,3.8rem);
+  font-weight:900;color:var(--gold);letter-spacing:0.04em;line-height:1.05;margin-bottom:8px;
+}
+.cover-sub{
+  font-family:'Playfair Display',serif;font-size:clamp(1rem,2.5vw,1.4rem);
+  font-weight:400;color:rgba(201,168,76,.75);letter-spacing:0.2em;text-transform:uppercase;
+  margin-bottom:24px;
+}
+.gold-line{width:160px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:20px auto}
+.cover-desc{color:rgba(255,255,255,.75);font-size:1.05rem;max-width:520px;margin:0 auto;line-height:1.7}
+
+/* TABLE OF CONTENTS */
+.toc{
+  max-width:680px;margin:40px auto;padding:0 24px;
+}
+.toc-box{background:var(--navy-mid);color:white;padding:28px 32px;border-top:3px solid var(--gold)}
+.toc-title{font-family:'Playfair Display',serif;font-size:1.1rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
+.toc-item{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(201,168,76,.12);font-size:.95rem;color:rgba(255,255,255,.8)}
+.toc-item:last-child{border-bottom:none}
+.toc-num{color:var(--gold-light);font-family:'Playfair Display',serif;font-weight:700;margin-right:12px}
+.toc-page{color:rgba(201,168,76,.6);font-style:italic}
+a.toc-link{color:rgba(255,255,255,.8);text-decoration:none}
+a.toc-link:hover{color:var(--gold-light)}
+
+/* BODY */
+.manual-body{max-width:720px;margin:0 auto;padding:40px 24px 80px}
+
+/* SECTIONS */
+.section{margin-bottom:52px}
+.section-header{
+  display:flex;align-items:center;gap:16px;
+  border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:24px;
+}
+.section-num{
+  font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;
+  color:var(--gold);line-height:1;min-width:48px;
+}
+.section-title{
+  font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;
+  color:var(--navy);letter-spacing:0.02em;
+}
+
+h3{
+  font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;
+  color:var(--navy-mid);margin:24px 0 10px;
+  border-left:3px solid var(--gold);padding-left:12px;
+}
+
+p{margin-bottom:14px;color:#333}
+
+/* HIGHLIGHT BOXES */
+.box{padding:18px 22px;margin:20px 0;border-left:4px solid var(--gold)}
+.box-gold{background:#fdf8ec;border-left-color:var(--gold)}
+.box-green{background:#f0faf4;border-left-color:var(--green)}
+.box-red{background:#fdf0f0;border-left-color:var(--red)}
+.box-navy{background:var(--navy-mid);color:white;border-left-color:var(--gold)}
+.box-navy p{color:rgba(255,255,255,.82)}
+.box-title{font-family:'Playfair Display',serif;font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:8px}
+.box-title.g{color:var(--gold)}
+.box-title.gr{color:var(--green)}
+.box-title.r{color:var(--red)}
+.box-title.w{color:var(--gold-light)}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;margin:20px 0}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+thead tr{background:var(--navy-mid);color:white}
+thead th{
+  font-family:'Playfair Display',serif;letter-spacing:.1em;font-size:.78rem;
+  text-transform:uppercase;padding:10px 14px;text-align:left;
+}
+tbody tr:nth-child(even){background:#f7f3ea}
+tbody td{padding:9px 14px;border-bottom:1px solid #e8e0d0;vertical-align:top}
+tbody tr:hover td{background:#f2ece0}
+
+/* STAT PILLS */
+.pill{display:inline-block;padding:2px 10px;border-radius:2px;font-size:.82rem;font-weight:600;margin:0 2px}
+.pill-g{background:rgba(39,174,96,.15);color:#1e8449;border:1px solid #27ae60}
+.pill-r{background:rgba(192,57,43,.12);color:#922b21;border:1px solid #c0392b}
+.pill-y{background:rgba(201,168,76,.15);color:#856123;border:1px solid var(--gold)}
+
+/* FORMULA BOX */
+.formula{
+  background:var(--navy);color:var(--gold-light);
+  font-family:'Courier New',monospace;font-size:.95rem;
+  padding:16px 20px;margin:16px 0;border-left:4px solid var(--gold);
+  line-height:1.8;
+}
+.formula .comment{color:rgba(201,168,76,.5);font-style:italic}
+
+/* STRATEGY CARDS */
+.strategy-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+@media(max-width:560px){.strategy-grid{grid-template-columns:1fr}}
+.strat-card{
+  background:var(--navy-mid);color:white;
+  padding:16px;border-top:3px solid;
+}
+.strat-card.s-green{border-top-color:var(--green)}
+.strat-card.s-red{border-top-color:var(--red)}
+.strat-card.s-gold{border-top-color:var(--gold)}
+.strat-card.s-blue{border-top-color:#3498db}
+.strat-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;margin-bottom:8px}
+.strat-card p{color:rgba(255,255,255,.78);font-size:.9rem;margin-bottom:0}
+
+/* TIMELINE */
+.timeline{margin:16px 0}
+.tl-item{display:flex;gap:16px;margin-bottom:14px}
+.tl-dot{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--gold);color:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;
+  flex-shrink:0;margin-top:4px;
+}
+.tl-body{flex:1}
+.tl-title{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:4px}
+
+/* GLOSSARY */
+.glossary-item{padding:12px 0;border-bottom:1px solid #e8e0d0}
+.glossary-item:last-child{border-bottom:none}
+.glossary-term{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:4px}
+.glossary-def{color:#444;font-size:.95rem}
+
+/* ACHIEVEMENT BOX */
+.achieve-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin:16px 0}
+.achieve-card{
+  background:var(--navy-mid);color:white;padding:14px;text-align:center;
+  border:1px solid rgba(201,168,76,.25);border-top:2px solid var(--gold);
+}
+.achieve-icon{font-size:1.8rem;margin-bottom:6px}
+.achieve-grade{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;color:var(--gold);line-height:1}
+.achieve-name{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(201,168,76,.65);margin-top:4px}
+
+/* FOOTER */
+footer{
+  background:var(--navy-mid);color:rgba(255,255,255,.5);
+  text-align:center;padding:24px;font-size:.82rem;letter-spacing:.1em;
+}
+</style>
+</head>
+<body>
+
+<!-- ══ COVER ══ -->
+<div class="cover">
+  <div class="cover-inner">
+    <div style="font-size:3.5rem;margin-bottom:16px">🏨</div>
+    <div class="cover-badge">Manual del Jugador — Edición Completa</div>
+    <div class="cover-title">Hotel Magnifique</div>
+    <div class="cover-sub">El Arte de la Hospitalidad</div>
+    <div class="gold-line"></div>
+    <div class="cover-desc">
+      Tu guía completa para dominar la gestión hotelera, entender los 
+      conceptos económicos clave y conquistar las codiciadas 5 estrellas 
+      en 30 días de juego.
+    </div>
+    <div style="margin-top:28px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap">
+      <span style="color:rgba(201,168,76,.75);font-size:.9rem">📅 30 días de juego</span>
+      <span style="color:rgba(201,168,76,.75);font-size:.9rem">🏨 20 habitaciones</span>
+      <span style="color:rgba(201,168,76,.75);font-size:.9rem">💰 Capital inicial: $5,000</span>
+      <span style="color:rgba(201,168,76,.75);font-size:.9rem">⭐ Meta: 5 estrellas</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TABLE OF CONTENTS ══ -->
+<div class="toc">
+  <div class="toc-box">
+    <div class="toc-title">Índice de Contenidos</div>
+    <div class="toc-item"><span><span class="toc-num">1</span><a class="toc-link" href="#s1">Introducción y Objetivo</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">2</span><a class="toc-link" href="#s2">Cómo Jugar — Paso a Paso</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">3</span><a class="toc-link" href="#s3">Las Variables de Decisión</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">4</span><a class="toc-link" href="#s4">Temporadas y Estacionalidad</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">5</span><a class="toc-link" href="#s5">Eventos Especiales</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">6</span><a class="toc-link" href="#s6">La Reputación y las Estrellas</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">7</span><a class="toc-link" href="#s7">Conceptos Económicos Clave</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">8</span><a class="toc-link" href="#s8">Estrategia para Ganar</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">9</span><a class="toc-link" href="#s9">Calificaciones y Logros</a></span></div>
+    <div class="toc-item"><span><span class="toc-num">10</span><a class="toc-link" href="#s10">Glosario de Términos</a></span></div>
+  </div>
+</div>
+
+<!-- ══ MANUAL BODY ══ -->
+<div class="manual-body">
+
+<!-- ══ 1. INTRO ══ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-num">1</div>
+    <div class="section-title">Introducción y Objetivo</div>
+  </div>
+
+  <p>
+    Bienvenido a <strong>Hotel Magnifique</strong>, un simulador de gestión hotelera diseñado para 
+    enseñar conceptos fundamentales de economía empresarial a través de la toma de decisiones 
+    cotidianas en un hotel de lujo.
+  </p>
+
+  <div class="box box-gold">
+    <div class="box-title g">◆ Objetivo del Juego</div>
+    <p>
+      Administra el Hotel Magnifique durante <strong>30 días</strong> consecutivos tomando 
+      decisiones diarias sobre precios, personal, marketing y servicios. Tu misión es 
+      <strong>maximizar las ganancias</strong> al tiempo que <strong>construyes la reputación</strong> 
+      del hotel hasta alcanzar las 5 estrellas.
+    </p>
+  </div>
+
+  <h3>¿Qué aprenderás?</h3>
+  <p>
+    Este juego simula los desafíos reales de la gestión hotelera. A lo largo de los 30 días 
+    practicarás conceptos como:
+  </p>
+
+  <div class="strategy-grid">
+    <div class="strat-card s-gold">
+      <div class="strat-title">💹 Yield Management</div>
+      <p>Ajustar precios según la demanda para maximizar ingresos en cada momento.</p>
+    </div>
+    <div class="strat-card s-gold">
+      <div class="strat-title">⚖️ Costos Fijos vs Variables</div>
+      <p>Identificar qué gastos son constantes y cuáles dependen de cuántos huéspedes tienes.</p>
+    </div>
+    <div class="strat-card s-gold">
+      <div class="strat-title">📊 Punto de Equilibrio</div>
+      <p>Calcular cuántas habitaciones necesitas ocupar para cubrir los gastos del día.</p>
+    </div>
+    <div class="strat-card s-gold">
+      <div class="strat-title">💎 Gestión de Reputación</div>
+      <p>Entender cómo la calidad del servicio afecta los ingresos a largo plazo.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 2. HOW TO PLAY ══ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-num">2</div>
+    <div class="section-title">Cómo Jugar — Paso a Paso</div>
+  </div>
+
+  <p>
+    Cada día del juego representa 24 horas de operación del hotel. El ciclo diario 
+    sigue siempre el mismo orden:
+  </p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot">1</div>
+      <div class="tl-body">
+        <div class="tl-title">Lee el Pronóstico del Día</div>
+        <p>
+          En el panel izquierdo verás la <strong>temporada</strong>, el <strong>evento especial</strong> 
+          y la <strong>demanda estimada</strong> del día. Esta información es crucial para tomar buenas 
+          decisiones. ¡Un congreso en la ciudad es muy diferente a una tormenta!
+        </p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">2</div>
+      <div class="tl-body">
+        <div class="tl-title">Toma tus Decisiones</div>
+        <p>
+          En el panel central ajusta los 4 controles: precio por noche, número de empleados, 
+          presupuesto de marketing y servicios adicionales (desayuno, piscina, spa). 
+          Observa cómo cambia la <em>estimación del día</em> en tiempo real.
+        </p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">3</div>
+      <div class="tl-body">
+        <div class="tl-title">Pulsa «Abrir el Hotel»</div>
+        <p>
+          El juego simulará el día completo aplicando tus decisiones junto a la demanda 
+          real (que incluye una pequeña variación aleatoria para simular la incertidumbre 
+          del mercado real).
+        </p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">4</div>
+      <div class="tl-body">
+        <div class="tl-title">Revisa el Informe del Día</div>
+        <p>
+          Aparecerá un resumen con las habitaciones ocupadas, ingresos, gastos, 
+          ganancia o pérdida del día y el cambio en tu reputación. 
+          Lee siempre el <strong>consejo del gerente</strong>: es específico para lo que ocurrió ese día.
+        </p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot">5</div>
+      <div class="tl-body">
+        <div class="tl-title">Avanza al Siguiente Día</div>
+        <p>
+          Pulsa el botón para continuar. El panel de estado a la derecha te mostrará 
+          el historial de ganancias, la ocupación anterior y los totales acumulados. 
+          Usa esa información para mejorar tus decisiones mañana.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="box box-red">
+    <div class="box-title r">⚠️ Condición de Derrota</div>
+    <p>
+      Si el capital del hotel llega a <strong>$0 o menos</strong>, el hotel quiebra y el juego termina 
+      antes de los 30 días. Los gastos fijos (personal, servicios, mantenimiento) se pagan 
+      aunque no haya ningún huésped. Vigila siempre tu capital.
+    </p>
+  </div>
+</div>
+
+<!-- ══ 3. VARIABLES ══ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-num">3</div>
+    <div class="section-title">Las Variables de Decisión</div>
+  </div>
+
+  <h3>🏷️ Precio por Noche ($40 — $500)</h3>
+  <p>
+    El precio es tu decisión más impactante. Determina cuánto paga cada huésped 
+    por dormir una noche en el hotel. Sin embargo, un precio muy alto ahuyenta 
+    a los clientes y uno muy bajo reduce las ganancias por habitación.
+  </p>
+
+  <div class="box box-gold">
+    <div class="box-title g">◆ El Concepto de Precio Óptimo</div>
+    <p>
+      Existe un <em>precio óptimo</em> para cada combinación de temporada y reputación. 
+      Si estás muy por encima de ese precio, la ocupación cae drásticamente. Si estás 
+      muy por debajo, ganarás menos de lo que podrías aunque el hotel esté lleno.
+    </p>
+  </div>
+
+  <p><strong>Factores que elevan el precio óptimo:</strong></p>
+  <ul style="margin:0 0 14px 20px;line-height:2">
+    <li>Alta temporada (verano): los viajeros aceptan precios más altos</li>
+    <li>Alta reputación (4-5 estrellas): el lujo justifica precios premium</li>
+    <li>Eventos de alta demanda (congresos, ferias): pocas alternativas disponibles</li>
+  </ul>
+
+  <p><strong>Factores que bajan el precio óptimo:</strong></p>
+  <ul style="margin:0 0 14px 20px;line-height:2">
+    <li>Temporada baja (invierno): pocos viajeros, mucha competencia</li>
+    <li>Baja reputación (1-2 estrellas): los huéspedes no justifican pagar mucho</li>
+    <li>Eventos negativos (tormenta, obras): la demanda total es muy reducida</li>
+  </ul>
+
+  <div class="formula">
+    <div class="comment">// Guía de precios orientativa por situación</div>
+    Demanda MUY ALTA (congreso + verano):     $200 – $400
+    Demanda ALTA (evento positivo + primav.): $140 – $220
+    Demanda MEDIA (día normal):               $90 – $160
+    Demanda BAJA (tormenta):                  $50 – $100
+    Demanda MUY BAJA (invierno + tormenta):   $40 – $80
+  </div>
+
+  <h3>👨‍💼 Personal ($130 por empleado por día)</h3>
+  <p>
+    Los empleados son imprescindibles para dar un buen servicio. Muy poco personal 
+    significa huéspedes insatisfechos (baja tu reputación); demasiado personal 
+    significa gastos insostenibles.
+  </p>
+
+  <div class="box box-green">
+    <div class="box-title gr">✓ La Regla de Oro del Personal</div>
+    <p>
+      <strong>1 empleado por cada 4 a 5 huéspedes</strong> es el ratio ideal.<br>
+      Si esperas 12 huéspedes hoy, contrata 2-3 empleados.<br>
+      Si el hotel estará lleno (20 huéspedes), necesitas 4-5 empleados.
+    </p>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Habitaciones ocupadas</th><th>Personal recomendado</th><th>Costo diario</th></tr></thead>
+      <tbody>
+        <tr><td>1 – 4</td><td>1 persona</td><td>$130</td></tr>
+        <tr><td>5 – 8</td><td>1 – 2 personas</td><td>$130 – $260</td></tr>
+        <tr><td>9 – 13</td><td>2 – 3 personas</td><td>$260 – $390</td></tr>
+        <tr><td>14 – 17</td><td>3 – 4 personas</td><td>$390 – $520</td></tr>
+        <tr><td>18 – 20</td><td>4 – 5 personas</td><td>$520 – $650</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>📢 Presupuesto de Marketing ($0 — $500)</h3>
+  <p>
+    El marketing aumenta la visibilidad del hotel y atrae más huéspedes potenciales. 
+    Sin embargo, tiene <em>rendimientos decrecientes</em>: los primeros $100 en marketing 
+    tienen mucho más impacto que los últimos $100.
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Inversión en marketing</th><th>Incremento de demanda</th><th>Cuándo usarlo</th></tr></thead>
+      <tbody>
+        <tr><td>$0</td><td>+0%</td><td>Cuando la demanda ya es muy alta sola</td></tr>
+        <tr><td>$100</td><td>+5.6%</td><td>Nivel base recomendado</td></tr>
+        <tr><td>$200</td><td>+11.2%</td><td>Temporada baja o eventos negativos</td></tr>
+        <tr><td>$300</td><td>+16.8%</td><td>Cuando necesitas llenar el hotel urgentemente</td></tr>
+        <tr><td>$500</td><td>+28% (máximo)</td><td>Solo en situaciones muy críticas</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-red">
+    <div class="box-title r">⚠️ Rendimientos Decrecientes</div>
+    <p>
+      Aumentar el marketing de $0 a $100 agrega ~5.6% de demanda. 
+      Aumentarlo de $400 a $500 agrega solo ~2.8% más. 
+      El ROI del marketing disminuye a medida que aumentas el gasto.
+    </p>
+  </div>
+
+  <h3>🛎️ Servicios Adicionales</h3>
+  <p>
+    Los servicios adicionales atraen más huéspedes y generan ingresos extra, 
+    pero tienen costos que debes analizar cuidadosamente:
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Servicio</th><th>Ingreso extra por hab.</th><th>Costo</th><th>Atractivo para</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>🍳 <strong>Desayuno</strong></td>
+          <td>+$22 por habitación</td>
+          <td>$14/habitación (variable)</td>
+          <td>Familias, turistas</td>
+        </tr>
+        <tr>
+          <td>🏊 <strong>Piscina</strong></td>
+          <td>+$18 por habitación</td>
+          <td>$70/día (fijo)</td>
+          <td>Familias, temporada cálida</td>
+        </tr>
+        <tr>
+          <td>💆 <strong>Spa</strong></td>
+          <td>+$35 por habitación</td>
+          <td>$100/día (fijo)</td>
+          <td>Ejecutivos, parejas, alta reputación</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-navy">
+    <div class="box-title w">◆ Cuándo Activan los Servicios</div>
+    <p>
+      <strong>Desayuno:</strong> siempre rentable si hay al menos 1-2 habitaciones. 
+      Ganancia neta: +$8 por habitación.<br><br>
+      <strong>Piscina:</strong> necesitas al menos <strong>4 habitaciones ocupadas</strong> 
+      para cubrir el costo fijo de $70. Con 10 habitaciones, genera +$110 neto.<br><br>
+      <strong>Spa:</strong> necesitas al menos <strong>3 habitaciones ocupadas</strong> 
+      para cubrir el costo fijo de $100. Con 10 habitaciones, genera +$250 neto.
+    </p>
+  </div>
+</div>
+
+<!-- ══ 4. SEASONS ══ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-num">4</div>
+    <div class="section-title">Temporadas y Estacionalidad</div>
+  </div>
+
+  <p>
+    Los 30 días de juego recorren las cuatro estaciones del año. Cada temporada 
+    tiene un <strong>factor de demanda base</strong> diferente que afecta cuántos 
+    huéspedes quieren alojarse, independientemente de otros eventos.
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Temporada</th><th>Días</th><th>Demanda base</th><th>Estrategia de precio</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>🌸 <strong>Primavera</strong></td>
+          <td>1 – 7</td>
+          <td><span class="pill pill-y">MODERADA</span></td>
+          <td>Precios medios. Construye reputación.</td>
+        </tr>
+        <tr>
+          <td>☀️ <strong>Verano</strong></td>
+          <td>8 – 15</td>
+          <td><span class="pill pill-g">MUY ALTA</span></td>
+          <td>¡Maximiza precios! Es tu mejor oportunidad.</td>
+        </tr>
+        <tr>
+          <td>🍂 <strong>Otoño</strong></td>
+          <td>16 – 22</td>
+          <td><span class="pill pill-y">MODERADA</span></td>
+          <td>Precios medios. Sigue cuidando la reputación.</td>
+        </tr>
+        <tr>
+          <td>❄️ <strong>Invierno</strong></td>
+          <td>23 – 30</td>
+          <td><span class="pill pill-r">BAJA</span></td>
+          <td>Precios bajos. Reduce gastos fijos.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-gold">
+    <div class="box-title g">◆ El Verano es Clave</div>
+    <p>
+      Los días 8 al 15 (verano) representan tu mayor oportunidad de generar ganancias. 
+      La demanda casi duplica la del invierno. Si llegas al verano con una buena 
+      reputación (3.5+ estrellas), podrás cobrar precios premium y maximizar ingresos.
+    </p>
+  </div>
+
+  <div class="box box-red">
+    <div class="box-title r">⚠️ Supervivencia en Invierno</div>
+    <p>
+      El invierno (días 23-30) es el período más difícil. La demanda base es muy baja. 
+      Estrategia recomendada: <strong>bajar el precio significativamente</strong>, 
+      <strong>reducir personal al mínimo</strong> y evaluar si abrir piscina/spa es rentable 
+      con tan pocos huéspedes.
+    </p>
+  </div>
+</div>
+
+<!-- ══ 5. EVENTS ══ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-num">5</div>
+    <div class="section-title">Eventos Especiales</div>
+  </div>
+
+  <p>
+    Cada día se produce un evento aleatorio que modifica la demanda del día. 
+    El sistema elige el evento al inicio de la jornada, así que puedes leerlo 
+    en el <em>Pronóstico del Día</em> antes de decidir.
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Evento</th><th>Efecto en demanda</th><th>Probabilidad</th><th>Acción recomendada</th></tr></thead>
+      <tbody>
+        <tr><td>🎤 Congreso Internacional</td><td><span class="pill pill-g">+50%</span></td><td>11%</td><td>Sube el precio agresivamente. Activa spa.</td></tr>
+        <tr><td>💼 Feria de Negocios</td><td><span class="pill pill-g">+40%</span></td><td>9%</td><td>Precio alto. Ejecutivos valoran el spa.</td></tr>
+        <tr><td>🏖️ Fin de Semana Largo</td><td><span class="pill pill-g">+30%</span></td><td>17%</td><td>Precio moderado-alto. Activa piscina.</td></tr>
+        <tr><td>🎡 Festival de la Ciudad</td><td><span class="pill pill-g">+25%</span></td><td>13%</td><td>Precio moderado. Desayuno incluido.</td></tr>
+        <tr><td>☁️ Día Normal</td><td>Sin cambio</td><td>33%</td><td>Sigue la estrategia de temporada.</td></tr>
+        <tr><td>🚧 Obras en la Ciudad</td><td><span class="pill pill-r">−28%</span></td><td>9%</td><td>Baja precio. Más marketing. Reduce staff.</td></tr>
+        <tr><td>⛈️ Tormenta</td><td><span class="pill pill-r">−42%</span></td><td>8%</td><td>Precio mínimo. Recorta todo lo posible.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-green">
+    <div class="box-title gr">✓ Tip Estratégico: Aprende a reaccionar</div>
+    <p>
+      El secreto está en <strong>adaptar tu estrategia al evento</strong>, no mantener siempre 
+      las mismas decisiones. Un gerente de hotel real cambia los precios cada día según 
+      lo que ve venir. Tú puedes hacer lo mismo.
+    </p>
+  </div>
+</div>
+
+<!-- ══ 6. REPUTATION ══ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-num">6</div>
+    <div class="section-title">La Reputación y las Estrellas</div>
+  </div>
+
+  <p>
+    La reputación va de <strong>1 a 5 estrellas</strong> y comienza en 3.0. 
+    No es solo un indicador de calidad: una mayor reputación genera más demanda 
+    de base, lo que te permite cobrar precios más altos con más huéspedes.
+  </p>
+
+  <h3>¿Qué sube la reputación?</h3>
+  <ul style="margin:0 0 14px 20px;line-height:2.2">
+    <li><strong>Buen ratio de personal:</strong> tener al menos 1 empleado por cada 3-4 huéspedes (+0.08/día)</li>
+    <li><strong>Servicios acordes al precio:</strong> precio alto + desayuno + piscina mejora la percepción (+0.04/día)</li>
+    <li><strong>Pequeñas fluctuaciones aleatorias positivas</strong> (imprevistos positivos)</li>
+  </ul>
+
+  <h3>¿Qué baja la reputación?</h3>
+  <ul style="margin:0 0 14px 20px;line-height:2.2">
+    <li><strong>Poco personal con alta ocupación:</strong> si el hotel está lleno y tienes pocos empleados (−0.15/día)</li>
+    <li><strong>Precio alto sin servicios:</strong> cobrar $200+ sin spa ni piscina con reputación baja (−0.07/día)</li>
+    <li><strong>Hotel saturado:</strong> ocupación >90% con ratio de personal <0.18 (−0.12/día)</li>
+    <li><strong>Fluctuaciones aleatorias negativas</strong> (imprevistos negativos)</li>
+  </ul>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Reputación</th><th>Estrellas</th><th>Efecto en demanda</th><th>Precio que justifica</th></tr></thead>
+      <tbody>
+        <tr><td>1.0 – 1.9</td><td>⭐☆☆☆☆</td><td>−20% de demanda</td><td>$40 – $90</td></tr>
+        <tr><td>2.0 – 2.9</td><td>⭐⭐☆☆☆</td><td>−8% de demanda</td><td>$70 – $140</td></tr>
+        <tr><td>3.0 – 3.4</td><td>⭐⭐⭐☆☆</td><td>Base (inicio)</td><td>$100 – $180</td></tr>
+        <tr><td>3.5 – 4.4</td><td>⭐⭐⭐✨☆</td><td>+10% de demanda</td><td>$150 – $280</td></tr>
+        <tr><td>4.5 – 5.0</td><td>⭐⭐⭐⭐⭐</td><td>+28% de demanda</td><td>$200 – $400</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-gold">
+    <div class="box-title g">◆ La Reputación es una Inversión</div>
+    <p>
+      Invertir en reputación durante los primeros días (buena atención, servicios de calidad) 
+      te permitirá cobrar precios más altos en verano. Un hotel de 4 estrellas en plena 
+      temporada puede ganar el doble que uno de 2 estrellas con el mismo número de habitaciones.
+    </p>
+  </div>
+</div>
+
+<!-- ══ 7. ECONOMICS ══ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-num">7</div>
+    <div class="section-title">Conceptos Económicos Clave</div>
+  </div>
+
+  <h3>Yield Management (Gestión de Rendimiento)</h3>
+  <p>
+    El <em>yield management</em> o <em>revenue management</em> es la práctica de ajustar 
+    los precios dinámicamente según la demanda esperada para maximizar los ingresos.
+  </p>
+  <p>
+    <strong>Ejemplo real:</strong> un mismo avión vende asientos idénticos a precios muy 
+    diferentes según el día, la anticipación de compra y la demanda. Los hoteles hacen 
+    lo mismo: el mismo cuarto puede costar $80 en lunes de enero o $350 en viernes de agosto.
+  </p>
+
+  <div class="formula">
+    <div class="comment">// Fórmula de decisión de yield management</div>
+    Si demanda ALTA → precio ALTO (capturar el excedente del consumidor)
+    Si demanda BAJA → precio BAJO (llenar habitaciones y cubrir costos fijos)
+    Si demanda MEDIA → precio MEDIO (equilibrio entre ocupación e ingresos)
+  </div>
+
+  <h3>Costos Fijos vs. Costos Variables</h3>
+  <p>
+    <strong>Costos fijos</strong> se pagan siempre, independientemente de cuántos 
+    huéspedes haya. <strong>Costos variables</strong> dependen del nivel de actividad.
+  </p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Tipo</th><th>Costo</th><th>¿Cambia con la ocupación?</th></tr></thead>
+      <tbody>
+        <tr><td>🏢 Mantenimiento y servicios básicos</td><td>$180/día</td><td>No — costo fijo</td></tr>
+        <tr><td>👨‍💼 Personal (tú decides cuánto)</td><td>$130/persona/día</td><td>No (lo decides antes)</td></tr>
+        <tr><td>🏊 Piscina abierta</td><td>$70/día</td><td>No — costo fijo diario</td></tr>
+        <tr><td>💆 Spa abierto</td><td>$100/día</td><td>No — costo fijo diario</td></tr>
+        <tr><td>📢 Marketing</td><td>Tú decides</td><td>No (lo decides antes)</td></tr>
+        <tr><td>🍳 Desayuno (ingredientes)</td><td>$14/habitación</td><td>Sí — costo variable</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box box-gold">
+    <div class="box-title g">◆ Lección clave sobre costos fijos</div>
+    <p>
+      Si abres el spa ($100/día) y solo tienes 2 huéspedes que pagan $35 extra cada uno 
+      ($70 de ingresos), <strong>pierdes $30 solo en el spa</strong>, sin contar el resto de costos. 
+      Los costos fijos deben "distribuirse" entre suficientes huéspedes para ser rentables.
+    </p>
+  </div>
+
+  <h3>Punto de Equilibrio</h3>
+  <p>
+    El punto de equilibrio es el número mínimo de habitaciones que debes ocupar para 
+    que los ingresos igualen a los gastos (ganancia cero). Por encima del punto de 
+    equilibrio, cada habitación adicional genera ganancia pura.
+  </p>
+
+  <div class="formula">
+    <div class="comment">// Fórmula del punto de equilibrio diario</div>
+    Gastos fijos = $180 (overhead) + $130×staff + marketing + piscina + spa
+    <br>
+    Punto de equilibrio = Gastos fijos / Precio por habitación
+    <br><br>
+    <div class="comment">// Ejemplo: precio $150, 4 empleados, sin servicios extra, $100 marketing</div>
+    Gastos fijos = 180 + 520 + 100 = $800
+    Punto de equilibrio = $800 / $150 = 5.3 → necesitas 6 habitaciones para no perder
+  </div>
+
+  <h3>Elasticidad Precio</h3>
+  <p>
+    La elasticidad mide cómo cambia la demanda cuando cambia el precio. 
+    En este juego, si doblas el precio óptimo, la demanda cae más que proporcionalmente. 
+    Por eso, subir demasiado el precio es más dañino que bajarlo un poco.
+  </p>
+
+  <h3>Retorno sobre la Inversión (ROI)</h3>
+  <p>
+    El ROI mide qué ganancia obtienes por cada peso invertido. Aplicado al marketing:
+  </p>
+  <div class="formula">
+    ROI marketing = (Ingresos adicionales generados - Costo del marketing) / Costo del marketing
+    <br><br>
+    <div class="comment">// Si el marketing de $100 trae 2 habitaciones extra a $120 c/u:</div>
+    ROI = ($240 - $100) / $100 = 1.4 → por cada $1 invertido, ganas $2.40
+  </div>
+</div>
+
+<!-- ══ 8. STRATEGY ══ -->
+<div class="section" id="s8">
+  <div class="section-header">
+    <div class="section-num">8</div>
+    <div class="section-title">Estrategia para Ganar</div>
+  </div>
+
+  <h3>Estrategia General por Temporada</h3>
+
+  <div class="strategy-grid">
+    <div class="strat-card s-green">
+      <div class="strat-title">🌸 Primavera (Días 1–7)</div>
+      <p>Construye reputación. Precios moderados ($100–$160). Personal adecuado. 
+      Desayuno incluido. Ahorra capital para el verano.</p>
+    </div>
+    <div class="strat-card s-gold">
+      <div class="strat-title">☀️ Verano (Días 8–15)</div>
+      <p>¡Máxima rentabilidad! Sube precios ($180–$350). Contrata personal suficiente. 
+      Activa todos los servicios. No escatimes: es tu temporada dorada.</p>
+    </div>
+    <div class="strat-card s-blue">
+      <div class="strat-title">🍂 Otoño (Días 16–22)</div>
+      <p>Mantén rentabilidad. Precios medios ($110–$190). Ajusta servicios según eventos. 
+      Sigue cuidando la reputación conseguida en verano.</p>
+    </div>
+    <div class="strat-card s-red">
+      <div class="strat-title">❄️ Invierno (Días 23–30)</div>
+      <p>Supervivencia. Precios bajos ($60–$120). Personal mínimo. 
+      Activa solo desayuno (rentable siempre) y spa si hay congresos.</p>
+    </div>
+  </div>
+
+  <h3>Respuesta a Eventos</h3>
+
+  <div class="box box-green">
+    <div class="box-title gr">✓ En eventos de alta demanda (Congreso, Feria, Festival)</div>
+    <p>
+      <strong>1. Sube el precio agresivamente</strong> — la demanda lo soportará.<br>
+      <strong>2. Contrata más personal</strong> — habrá más huéspedes que atender.<br>
+      <strong>3. Activa el spa</strong> — los visitantes de congresos pagan por el lujo.<br>
+      <strong>4. Reduce el marketing</strong> — la demanda ya es alta; no necesitas gastar más.
+    </p>
+  </div>
+
+  <div class="box box-red">
+    <div class="box-title r">⚠️ En eventos de baja demanda (Tormenta, Obras)</div>
+    <p>
+      <strong>1. Baja el precio</strong> — atrae a los pocos viajeros que sí necesitan alojamiento.<br>
+      <strong>2. Reduce el personal al mínimo</strong> — habrá pocos huéspedes.<br>
+      <strong>3. Cierra piscina y spa</strong> — con poca ocupación, solo generan pérdidas.<br>
+      <strong>4. Sube el marketing</strong> — necesitas más visibilidad para capturar la poca demanda.
+    </p>
+  </div>
+
+  <h3>Las 5 Reglas de Oro</h3>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--gold);font-size:.85rem">I</div>
+      <div class="tl-body">
+        <div class="tl-title">Nunca gastes más de lo que ingresas de forma sostenida</div>
+        <p>Perder dinero un día malo es normal. Perder dinero varios días seguidos puede 
+        llevarte a la quiebra. Siempre controla el balance.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--gold);font-size:.85rem">II</div>
+      <div class="tl-body">
+        <div class="tl-title">Lee el pronóstico ANTES de decidir</div>
+        <p>El evento del día es la información más valiosa que tienes. Una decisión 
+        correcta en un congreso puede valer el triple que en un día normal.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--gold);font-size:.85rem">III</div>
+      <div class="tl-body">
+        <div class="tl-title">La reputación es un activo, no un adorno</div>
+        <p>Cada estrella adicional genera más demanda. Invierte en reputación temprano 
+        para rentabilizarla durante el verano y con clientes de mayor poder adquisitivo.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--gold);font-size:.85rem">IV</div>
+      <div class="tl-body">
+        <div class="tl-title">Ajusta el personal a la ocupación, no al revés</div>
+        <p>El personal es tu mayor gasto variable. Contrata según cuántas habitaciones 
+        esperas ocupar, no para mantener siempre el mismo número de empleados.</p>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot" style="background:var(--gold);font-size:.85rem">V</div>
+      <div class="tl-body">
+        <div class="tl-title">Los servicios son rentables solo si hay suficientes huéspedes</div>
+        <p>Calcula siempre el punto de equilibrio de cada servicio antes de activarlo. 
+        La piscina a $70/día necesita al menos 4 habitaciones para justificarse.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 9. GRADES ══ -->
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-num">9</div>
+    <div class="section-title">Calificaciones y Logros</div>
+  </div>
+
+  <p>
+    Al final de los 30 días recibirás una calificación basada en tus ganancias 
+    totales, tu reputación final y la ocupación media conseguida:
+  </p>
+
+  <div class="achieve-grid">
+    <div class="achieve-card">
+      <div class="achieve-icon">👑</div>
+      <div class="achieve-grade" style="color:#f1c40f">S</div>
+      <div class="achieve-name">Maestro Hotelero</div>
+    </div>
+    <div class="achieve-card">
+      <div class="achieve-icon">🏆</div>
+      <div class="achieve-grade" style="color:var(--green)">A</div>
+      <div class="achieve-name">Primera Clase</div>
+    </div>
+    <div class="achieve-card">
+      <div class="achieve-icon">⭐</div>
+      <div class="achieve-grade" style="color:#3498db">B</div>
+      <div class="achieve-name">Competente</div>
+    </div>
+    <div class="achieve-card">
+      <div class="achieve-icon">📈</div>
+      <div class="achieve-grade" style="color:#e67e22">C</div>
+      <div class="achieve-name">Con Potencial</div>
+    </div>
+    <div class="achieve-card">
+      <div class="achieve-icon">📚</div>
+      <div class="achieve-grade" style="color:var(--red)">D</div>
+      <div class="achieve-name">A Mejorar</div>
+    </div>
+    <div class="achieve-card">
+      <div class="achieve-icon">💸</div>
+      <div class="achieve-grade" style="color:var(--red)">—</div>
+      <div class="achieve-name">Quiebra</div>
+    </div>
+  </div>
+
+  <p>
+    La calificación <strong>S</strong> requiere tanto alta rentabilidad como reputación 
+    de 4.5+ estrellas. Puedes tener muchas ganancias con calificación A si tu 
+    reputación es moderada, o viceversa.
+  </p>
+</div>
+
+<!-- ══ 10. GLOSSARY ══ -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-num">10</div>
+    <div class="section-title">Glosario de Términos</div>
+  </div>
+
+  <div class="glossary-item">
+    <div class="glossary-term">Capital / Liquidez</div>
+    <div class="glossary-def">Dinero disponible del hotel en este momento. Si llega a cero, el hotel quiebra. Empieza en $5,000.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Costo Fijo</div>
+    <div class="glossary-def">Gasto que se paga siempre, sin importar cuántos huéspedes haya. Ejemplos: mantenimiento ($180/día), piscina abierta ($70/día), spa abierto ($100/día).</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Costo Variable</div>
+    <div class="glossary-def">Gasto que depende del nivel de actividad. Ejemplo: el costo del desayuno ($14) solo se paga por habitaciones realmente ocupadas.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Elasticidad Precio</div>
+    <div class="glossary-def">Medida de cómo cambia la demanda cuando cambia el precio. Alta elasticidad = una pequeña subida de precio reduce mucho la demanda.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Estacionalidad</div>
+    <div class="glossary-def">Variación de la demanda según la época del año. El verano tiene mayor demanda hotelera que el invierno en la mayoría de destinos.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Ganancia / Beneficio (Profit)</div>
+    <div class="glossary-def">Ingresos totales del día menos gastos totales del día. Puede ser positivo (ganancia) o negativo (pérdida).</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Ingresos (Revenue)</div>
+    <div class="glossary-def">Todo el dinero que entra al hotel: precio de habitaciones × habitaciones ocupadas + extras por servicios. No incluye gastos.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Ocupación</div>
+    <div class="glossary-def">Porcentaje de habitaciones del hotel que tienen huéspedes. 20/20 habitaciones = 100% de ocupación. 10/20 = 50%.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Precio Óptimo</div>
+    <div class="glossary-def">El precio que maximiza los ingresos totales, equilibrando precio por habitación y número de habitaciones vendidas.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Punto de Equilibrio</div>
+    <div class="glossary-def">Nivel mínimo de ventas (habitaciones) para cubrir todos los gastos del día. Por encima del punto de equilibrio se genera ganancia.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Rendimientos Decrecientes</div>
+    <div class="glossary-def">Fenómeno donde cada unidad adicional de inversión genera menos beneficio que la anterior. Aplica al marketing en este juego.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Reputación</div>
+    <div class="glossary-def">Valoración de 1 a 5 estrellas que refleja la calidad percibida del hotel. Afecta directamente la demanda base y los precios que puedes cobrar.</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">ROI (Return on Investment)</div>
+    <div class="glossary-def">Retorno sobre la inversión. Mide la ganancia generada en relación al costo de la inversión. Un ROI de 2.0 significa que por cada $1 invertido, se obtienen $3 ($1 original + $2 de ganancia).</div>
+  </div>
+  <div class="glossary-item">
+    <div class="glossary-term">Yield Management</div>
+    <div class="glossary-def">Estrategia de ajustar precios dinámicamente según la demanda para maximizar los ingresos. Es la práctica central de la gestión hotelera moderna.</div>
+  </div>
+
+</div>
+
+</div><!-- /.manual-body -->
+
+<footer>
+  Hotel Magnifique — Manual del Jugador &nbsp;|&nbsp; Juego con fines educativos &nbsp;|&nbsp; ✦ ✦ ✦ ✦ ✦
+</footer>
+
+</body>
+</html>
