@@ -46,6 +46,25 @@ def new_game():
     return redirect(url_for('game.play'))
 
 
+@game_bp.route('/final-results', methods=['GET'])
+@login_required
+def final_results():
+    """Mostrar resultados finales de la última partida terminada."""
+    partida_activa = Partida.query.filter_by(
+        usuario_id=current_user.id, activa=True
+    ).first()
+    if partida_activa:
+        return redirect(url_for('game.play'))
+
+    partida = Partida.query.filter_by(
+        usuario_id=current_user.id, activa=False
+    ).order_by(Partida.updated_at.desc()).first()
+    if not partida or not partida.grado_final:
+        return redirect(url_for('game.no_game'))
+
+    return render_template('game/end.html', partida=partida)
+
+
 @game_bp.route('/play', methods=['GET'])
 @login_required
 def play():
@@ -204,6 +223,7 @@ def run_day():
         'game_over': game_over,
         'next_day': partida.dia_actual if not game_over else None,
         'grade': partida.grado_final,
+        'final_results_url': url_for('game.final_results') if game_over else None,
     })
 
 
@@ -211,10 +231,11 @@ def _calc_grade(partida: Partida) -> str:
     """Calcula el grado final (S/A/B/C/D/💸)."""
     if partida.capital <= 0:
         return '💸'
+    expense_ratio = 0 if partida.gasto_total <= 0 else float(partida.ingreso_total) / float(partida.gasto_total)
     score = (
         float(partida.ganancia_total) / 1000 * 0.4 +
         float(partida.reputacion) * 12 +
-        partida.ingreso_total / partida.gasto_total * 22
+        expense_ratio * 22
     )
     if score >= 85 and float(partida.reputacion) >= 4.5:
         return 'S'

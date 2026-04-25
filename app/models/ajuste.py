@@ -2,8 +2,8 @@
 Hotel Magnifique — Model: Ajuste
 """
 import uuid
-from datetime import datetime
 from app import db
+from app.models._timestamps import utc_now
 
 
 class Ajuste(db.Model):
@@ -15,7 +15,7 @@ class Ajuste(db.Model):
     valor_base = db.Column(db.Numeric(10, 4), nullable=False)
     valor_actual = db.Column(db.Numeric(10, 4), nullable=False)
     motivo = db.Column(db.String(50), nullable=False)  # inflation|evento|manual
-    applied_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    applied_at = db.Column(db.DateTime, nullable=False, default=utc_now)
 
     # ── Relaciones ─────────────────────────────────────
     partida = db.relationship('Partida', back_populates='ajustes')

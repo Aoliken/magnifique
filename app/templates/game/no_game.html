@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Sin partida activa — Hotel Magnifique{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-6">
+    <div class="panel text-center">
+      <div class="panel-title">◆ Nueva partida</div>
+      <p style="color:var(--text-light)">Todavía no tenés una partida activa. Iniciá una nueva temporada para entrar al hotel.</p>
+      <form method="POST" action="{{ url_for('game.new_game') }}">
+        <button class="btn btn-gold" type="submit">✦ Nueva partida ✦</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

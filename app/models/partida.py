@@ -2,8 +2,8 @@
 Hotel Magnifique — Model: Partida
 """
 import uuid
-from datetime import datetime
 from app import db
+from app.models._timestamps import utc_now
 
 
 class Partida(db.Model):
@@ -18,8 +18,8 @@ class Partida(db.Model):
     ingreso_total = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     gasto_total = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
     activa = db.Column(db.Boolean, nullable=False, default=True)
-    started_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    started_at = db.Column(db.DateTime, nullable=False, default=utc_now)
+    updated_at = db.Column(db.DateTime, nullable=False, default=utc_now, onupdate=utc_now)
     grado_final = db.Column(db.String(10), nullable=True)  # A|B|C|D|F|S|💸
 
     # ── Relaciones ─────────────────────────────────────

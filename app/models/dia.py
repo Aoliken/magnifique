@@ -2,8 +2,8 @@
 Hotel Magnifique — Model: Dia
 """
 import uuid
-from datetime import datetime
 from app import db
+from app.models._timestamps import utc_now
 
 
 class Dia(db.Model):
@@ -16,8 +16,8 @@ class Dia(db.Model):
     evento = db.Column(db.String(50), nullable=False)  # Normal|Congreso|Feria|...
     factor_temporada = db.Column(db.Numeric(3, 2), nullable=False)
     factor_evento = db.Column(db.Numeric(3, 2), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=utc_now)
+    updated_at = db.Column(db.DateTime, nullable=False, default=utc_now)
 
     # ── Relaciones ─────────────────────────────────────
     partida = db.relationship('Partida', back_populates='dias')

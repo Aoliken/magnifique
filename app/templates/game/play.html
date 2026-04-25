@@ -137,7 +137,7 @@
       </div>
       <div class="stat-row">
         <span class="sr-lbl">Ganancia ayer</span>
-        <span class="sr-val pos">+{{ "$%,.0f"|format(prev_resultado.balance) }}</span>
+        <span class="sr-val pos">+{{ "${:,.0f}".format(prev_resultado.balance) }}</span>
       </div>
       {% endif %}
       <div class="stat-row">
@@ -206,6 +206,9 @@ async function submitDay(e) {
     document.getElementById('results-overlay').style.display = 'flex';
     if (result.game_over) {
       document.getElementById('next-btn').textContent = '🏆 Ver Resultados Finales';
+      document.getElementById('next-btn').onclick = () => window.location.assign(result.final_results_url);
+    } else {
+      document.getElementById('next-btn').onclick = () => window.location.reload();
     }
   }
 }

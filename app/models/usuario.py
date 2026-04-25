@@ -3,9 +3,9 @@ Hotel Magnifique — Model: Usuario
 """
 import uuid
 import bcrypt
-from datetime import datetime
 from app import db, login_manager
 from flask_login import UserMixin
+from app.models._timestamps import utc_now
 
 
 class Usuario(db.Model, UserMixin):
@@ -16,7 +16,7 @@ class Usuario(db.Model, UserMixin):
     password_hash = db.Column(db.String(60), nullable=False)
     nombre = db.Column(db.String(100), nullable=False)
     rol = db.Column(db.String(20), nullable=False, default='usuario')  # 'usuario' | 'admin'
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=utc_now)
     last_login = db.Column(db.DateTime, nullable=True)
 
     # ── Relaciones ──────────────────────────────���──────
