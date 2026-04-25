@@ -14,6 +14,13 @@ from app.engine.constants import INITIAL_CAPITAL, INITIAL_REPUTATION, ROOMS_TOTA
 game_bp = Blueprint('game', __name__, url_prefix='/game')
 
 
+@game_bp.route('/no-game', methods=['GET'])
+@login_required
+def no_game():
+    """Estado sin partida activa."""
+    return render_template('game/no_game.html')
+
+
 @game_bp.route('/new', methods=['POST'])
 @login_required
 def new_game():
@@ -129,8 +136,8 @@ def run_day():
     decision = Decision.query.filter_by(dia_id=dia.id).first()
     if not decision:
         decision = Decision(dia_id=dia.id)
-    decision.price = decisions.price
-    decision.staff = decisions.staff
+    decision.precio = decisions.price
+    decision.personal = decisions.staff
     decision.marketing = decisions.marketing
     decision.desayuno = decisions.breakfast
     decision.piscina = decisions.pool
@@ -177,6 +184,8 @@ def run_day():
     if game_over:
         partida.activa = False
         partida.grado_final = _calc_grade(partida)
+    else:
+        partida.dia_actual += 1
 
     db.session.commit()
 
@@ -193,7 +202,7 @@ def run_day():
         'rep_change': float(result.rep_change),
         'feedback': feedback,
         'game_over': game_over,
-        'next_day': partida.dia_actual + 1 if not game_over else None,
+        'next_day': partida.dia_actual if not game_over else None,
         'grade': partida.grado_final,
     })
 

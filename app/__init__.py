@@ -13,19 +13,53 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 
 
-def create_app():
+DEFAULT_SECRET_KEY = 'dev-secret-key-cambiar-en-produccion'
+DEFAULT_SQLITE_URI = 'sqlite:///magnifique.db'
+
+
+def _is_set(value: str | None) -> bool:
+    return bool(value and value.strip() and not value.strip().startswith('#'))
+
+
+def _resolve_secret_key() -> str:
+    secret_key = os.getenv('SECRET_KEY')
+    return secret_key if _is_set(secret_key) else DEFAULT_SECRET_KEY
+
+
+def _resolve_database_uri() -> str:
+    database_url = os.getenv('DATABASE_URL')
+    if _is_set(database_url):
+        return database_url
+
+    db_parts = {
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'host': os.getenv('DB_HOST'),
+        'port': os.getenv('DB_PORT'),
+        'name': os.getenv('DB_NAME'),
+    }
+    if all(_is_set(value) for value in db_parts.values()):
+        return (
+            f"postgresql://{db_parts['user']}:{db_parts['password']}"
+            f"@{db_parts['host']}:{db_parts['port']}/{db_parts['name']}"
+        )
+
+    return DEFAULT_SQLITE_URI
+
+
+def create_app(test_config=None):
     load_dotenv()
 
     app = Flask(__name__)
 
     # ── Configuración ──────────────────────────────────────
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-cambiar-en-produccion')
-    app.config['SQLALCHEMY_DATABASE_URI'] = (
-        f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}"
-        f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-    )
+    app.config['SECRET_KEY'] = _resolve_secret_key()
+    app.config['SQLALCHEMY_DATABASE_URI'] = _resolve_database_uri()
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['REMEMBER_COOKIE_DURATION'] = 86400  # 24h base, se ajusta por User-Agent
+
+    if test_config:
+        app.config.update(test_config)
 
     # ── Inicializar extensiones ──────────────────────────────────────
     db.init_app(app)
