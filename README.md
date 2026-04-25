@@ -1,16 +1,22 @@
-\# Mini juego educativo sobre Management de un hotel
+# Mini juego educativo sobre Management de un hotel
 
 
 
-\## Despliegue local
+## Despliegue local
 
 Ir a la carpeta donde estan los archivos del proyecto:
 
 
+```powershell
+cd H:\\Meine Ablage\\Dokumente\\Academia\\Proyectos de Investigación\\Temas para próximos papers\\Mini juegos educativos sobre Management
 
-&#x20;   cd H:\\Meine Ablage\\Dokumente\\Academia\\Proyectos de Investigación\\Temas para próximos papers\\Mini juegos educativos sobre Management
+conda activate py3.12
+pip install -r requirements.txt
+```
 
-&#x20;   conda activate py3.12
+poner los valores en .env
 
-&#x20;   
+    alembic upgrade head
+
+       
 

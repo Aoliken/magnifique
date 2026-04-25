@@ -1,0 +1,28 @@
+# ═══════════════════════════════════════════════════════════════
+# Hotel Magnifique — Dependencias del Backend
+# Instalar con: pip install -r requirements.txt
+# ═══════════════════════════════════════════════════════════════
+
+# ── Web Framework ──────────────────────────────────────────
+Flask==3.1.0
+Flask-Login==0.6.3
+Flask-WTF==1.2.2
+WTForms==3.2.1
+
+# ── Database ──────────────────────────────────────────────
+SQLAlchemy==2.0.36
+psycopg2-binary==2.9.10
+alembic==1.14.0
+flask_sqlalchemy
+
+# ── Testing ────────────────────────────────────────────────
+pytest==8.3.4
+pytest-cov==6.0.0
+factory-boy==3.3.2
+Faker==30.8.2
+
+# ── Environment ──────────────────────────────────────────────
+python-dotenv==1.0.1
+
+# ── Utilities ────────────────────────────────────────────────
+bcrypt==4.2.1

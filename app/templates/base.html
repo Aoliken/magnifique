@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Hotel Magnifique{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#0a1628;--navy-mid:#162240;--navy-light:#1e3358;--gold:#c9a84c;--gold-light:#e8c97a;--gold-pale:#f5e6c0;--cream:#faf6ee;--green:#2ecc71;--red:#e74c3c;--text-light:rgba(255,255,255, 0.82)}
+body{font-family:'Cormorant Garamond',Georgia,serif;background:var(--navy);color:var(--cream);min-height:100vh;overflow-x:hidden}
+.navbar{background:var(--navy-mid);border-bottom:2px solid var(--gold);padding:10px 20px}
+.hotel-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:900;color:var(--gold);letter-spacing:0.04em}
+.stat-chip{display:flex;flex-direction:column;align-items:center;min-width:60px}
+.sc-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(201,168,76,0.6)}
+.sc-value{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--gold-light)}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(201,168,76,0.1)}
+.sr-lbl{font-size:0.76rem;color:rgba(255,255,255,0.55)}
+.sr-val{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-light)}
+.panel{background:var(--navy-mid);border:1px solid rgba(201,168,76,0.25);border-top:3px solid var(--gold);padding:18px;position:relative}
+.panel-title{font-family:'Playfair Display',serif;font-size:0.78rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(201,168,76,0.18)}
+.btn-gold{background:linear-gradient(135deg,#b8912e 0%,var(--gold-light) 50%,#b8912e 100%);color:var(--navy);border:none;padding:15px 44px;font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;letter-spacing:0.12em;cursor:pointer;text-transform:uppercase;clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);transition:all .25s}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,0.55)}
+.pos{color:var(--green)}.neg{color:var(--red)}.gold-c{color:var(--gold-light)}
+input[type="range"]{-webkit-appearance:none;width:100%;height:3px;background:rgba(201,168,76,0.2);outline:none}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;background:var(--gold);border-radius:50%}
+.room-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.room-dot{aspect-ratio:1;background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.18);transition:all .3s}
+.room-dot.occ{background:var(--gold);border-color:var(--gold-light)}
+.demand-badge{display:inline-block;padding:3px 12px;font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;border-radius:1px}
+.d-muy-alta{background:rgba(46,204,113,.18);color:#2ecc71;border:1px solid #2ecc71}
+.d-alta{background:rgba(39,174,96,.15);color:#27ae60;border:1px solid #27ae60}
+.d-media{background:rgba(241,196,15,.15);color:#f1c40f;border:1px solid #f1c40f}
+.d-baja{background:rgba(230,126,34,.15);color:#e67e22;border:1px solid #e67e22}
+.d-muy-baja{background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid #e74c3c}
+</style>
+{% block extra_style %}{% endblock %}
+</head>
+<body>
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid d-flex align-items-center justify-content-between">
+    <div class="hotel-logo">✦ Hotel Magnifique</div>
+    <div class="d-flex gap-4">
+      <div class="stat-chip">
+        <div class="sc-label">Día</div>
+        <div class="sc-value">{% block nav_day %}{% endblock %}</div>
+      </div>
+      <div class="stat-chip">
+        <div class="sc-label">Capital</div>
+        <div class="sc-value" id="money-disp">{% block nav_money %}{% endblock %}</div>
+      </div>
+      <div class="stat-chip">
+        <div class="sc-label">Reputación</div>
+        <div class="sc-value">{% block nav_rep %}{% endblock %}</div>
+      </div>
+    </div>
+    {% if current_user.is_authenticated %}
+    <form action="{{ url_for('auth.logout') }}" method="POST">
+      <button class="btn btn-sm btn-outline-warning" type="submit">Cerrar sesión</button>
+    </form>
+    {% endif %}
+  </div>
+</nav>
+
+<main class="container-fluid py-4">
+{% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_script %}{% endblock %}
+</body>
+</html>

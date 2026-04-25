@@ -1,0 +1,7 @@
+# Esta carpeta se reemplaza con `alembic init migrations`
+# Una vez instalado requirements.txt y configurado .env:
+# conda activate py3.12
+# pip install -r requirements.txt
+# alembic init migrations
+# alembic revision --autogenerate -m "init"
+# alembic upgrade head

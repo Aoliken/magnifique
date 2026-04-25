@@ -1,0 +1,75 @@
+/* ═══════════════════════════════════════════════════════════════
+   Hotel Magnifique — Game Styles
+   Copiado de hotel-magnifique.html (original client-side game)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Estilos del juego — reservados para uso futuro en templates Jinja2 */
+:root{
+  --navy:#0a1628;--navy-mid:#162240;--navy-light:#1e3358;
+  --gold:#c9a84c;--gold-light:#e8c97a;--gold-pale:#f5e6c0;
+  --cream:#faf6ee;--green:#2ecc71;--red:#e74c3c;
+  --text-light:rgba(255,255,255,0.82);
+}
+
+.day-bar{position:relative;bottom:0;left:0;right:0;height:3px;background:rgba(201,168,76,0.12)}
+.day-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width .5s ease}
+
+.btn-gold{
+  background:linear-gradient(135deg,#b8912e 0%,var(--gold-light) 50%,#b8912e 100%);
+  color:var(--navy);border:none;padding:15px 44px;
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+  letter-spacing:0.12em;cursor:pointer;text-transform:uppercase;
+  clip-path:polygon(14px 0%,100% 0%,calc(100% - 14px) 100%,0% 100%);
+  transition:all .25s;
+}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(201,168,76,0.55)}
+
+.panel{background:var(--navy-mid);border:1px solid rgba(201,168,76,0.25);border-top:3px solid var(--gold);padding:18px;position:relative}
+.panel-title{font-family:'Playfair Display',serif;font-size:0.78rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(201,168,76,0.18)}
+
+.pos{color:var(--green)}.neg{color:var(--red)}.gold-c{color:var(--gold-light)}
+input[type="range"]{-webkit-appearance:none;width:100%;height:3px;background:rgba(201,168,76,0.2);outline:none;border-radius:2px;cursor:pointer}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;background:var(--gold);border-radius:50%;box-shadow:0 0 8px rgba(201,168,76,0.5)}
+
+.room-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.room-dot{aspect-ratio:1;background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.18);transition:all .3s}
+.room-dot.occ{background:var(--gold);border-color:var(--gold-light);box-shadow:0 0 4px rgba(201,168,76,0.4)}
+
+.mini-chart{height:72px;background:rgba(0,0,0,0.2);display:flex;align-items:flex-end;gap:2px;padding:4px}
+.mc-bar{flex:1;min-width:3px;transition:height .3s}
+.mc-pos{background:var(--gold)}
+.mc-neg{background:var(--red)}
+
+.hint-text{font-size:0.72rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:5px;min-height:18px;transition:color .2s}
+.hint-ok{color:rgba(46,204,113,0.7)}
+.hint-warn{color:rgba(241,196,15,0.75)}
+.hint-bad{color:rgba(231,76,60,0.75)}
+
+.demand-badge{display:inline-block;padding:3px 12px;font-size:0.75rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;border-radius:1px}
+.d-muy-alta{background:rgba(46,204,113,.18);color:#2ecc71;border:1px solid #2ecc71}
+.d-alta{background:rgba(39,174,96,.15);color:#27ae60;border:1px solid #27ae60}
+.d-media{background:rgba(241,196,15,.15);color:#f1c40f;border:1px solid #f1c40f}
+.d-baja{background:rgba(230,126,34,.15);color:#e67e22;border:1px solid #e67e22}
+.d-muy-baja{background:rgba(231,76,60,.15);color:#e74c3c;border:1px solid #e74c3c}
+
+.est-box{background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.22);padding:12px;margin-top:14px}
+.est-title{font-size:0.65rem;letter-spacing:0.22em;text-transform:uppercase;color:rgba(201,168,76,0.7);margin-bottom:8px}
+.est-row{display:flex;justify-content:space-between;padding:3px 0;font-size:0.88rem}
+.est-lbl{color:rgba(255,255,255,0.55)}
+.est-val{font-family:'Playfair Display',serif;color:var(--cream)}
+
+.fc-item{margin-bottom:12px;padding:10px 12px;background:rgba(201,168,76,0.04);border-left:3px solid rgba(201,168,76,0.5)}
+.fc-lbl{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px}
+.fc-val{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-light)}
+.fc-desc{font-size:0.82rem;color:var(--text-light);margin-top:4px;font-style:italic;line-height:1.45}
+
+.amen-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:8px}
+.amen-lbl{display:block;padding:9px 6px;text-align:center;border:1px solid rgba(201,168,76,0.25);cursor:pointer;transition:all .2s}
+.amen-lbl:hover{border-color:rgba(201,168,76,0.5);background:rgba(201,168,76,0.06)}
+
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(201,168,76,0.1)}
+.sr-lbl{font-size:0.76rem;color:rgba(255,255,255,0.55);letter-spacing:0.08em}
+.sr-val{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-light)}
+.occ-lbl{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:8px}
+
+.range-lbs{display:flex;justify-content:space-between;font-size:0.65rem;color:rgba(255,255,255,0.35);margin-top:3px}

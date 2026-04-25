@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="text-center mt-5">
+  <h1 style="font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,4rem);font-weight:900;color:var(--gold)">Hotel Magnifique</h1>
+  <p style="color:rgba(201,168,76,.7);letter-spacing:.35em;text-transform:uppercase;margin-top:8px">El Arte de la Hospitalidad</p>
+  <p class="mt-4" style="max-width:480px;margin:20px auto;color:var(--text-light);font-size:1.05rem;line-height:1.75">
+    Dirige tu propio hotel de lujo durante <strong style="color:var(--gold-light)">30 días</strong>.
+    Aprende a gestionar precios, personal y servicios para maximizar ganancias y conquistar las 5 estrellas.
+  </p>
+  <div class="mt-4 d-flex justify-content-center gap-3 flex-wrap">
+    <span class="d-inline-block p-2" style="color:var(--gold);border:1px solid rgba(201,168,76,0.3)">🏨 20 Habitaciones</span>
+    <span class="d-inline-block p-2" style="color:var(--gold);border:1px solid rgba(201,168,76,0.3)">📅 30 Días</span>
+    <span class="d-inline-block p-2" style="color:var(--gold);border:1px solid rgba(201,168,76,0.3)">💰 $5,000 de capital</span>
+  </div>
+  {% if not current_user.is_authenticated %}
+  <div class="mt-5">
+    <a href="{{ url_for('auth.login') }}" class="btn btn-gold">✦ Comenzar la Aventura ✦</a>
+  </div>
+  {% else %}
+  <div class="mt-5">
+    <form action="{{ url_for('game.new_game') }}" method="POST">
+      <button class="btn btn-gold" type="submit">✦ Nueva Partida ✦</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

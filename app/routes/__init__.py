@@ -1,0 +1,3 @@
+"""
+Hotel Magnifique — Routes Package
+"""

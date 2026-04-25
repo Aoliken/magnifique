@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block nav_day %}{{ partida.dia_actual }} / 30{% endblock %}
+{% block nav_money %}${{ "{:,}".format(partida.capital|int) }}{% endblock %}
+{% block nav_rep %}{{ partida.reputacion }}{% endblock %}
+
+{% block extra_style %}
+<style>
+.amen-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.est-box{background:rgba(201,168,76,0.07);border:1px solid rgba(201,168,76,0.22);padding:12px;margin-top:14px}
+.est-title{font-size:0.65rem;letter-spacing:0.22em;text-transform:uppercase;color:rgba(201,168,76,0.7);margin-bottom:8px}
+.est-row{display:flex;justify-content:space-between;padding:3px 0;font-size:0.88rem}
+.est-lbl{color:rgba(255,255,255,0.55)}
+.est-val{font-family:'Playfair Display',serif;color:var(--cream)}
+.fc-item{margin-bottom:12px;padding:10px 12px;background:rgba(201,168,76,0.04);border-left:3px solid rgba(201,168,76,0.5)}
+.fc-lbl{font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:3px}
+.fc-val{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--gold-light)}
+.fc-desc{font-size:0.82rem;color:var(--text-light);margin-top:4px;font-style:italic}
+.range-lbs{display:flex;justify-content:space-between;font-size:0.65rem;color:rgba(255,255,255,0.35);margin-top:3px}
+.hint-text{font-size:0.72rem;color:rgba(255,255,255,0.4);font-style:italic;margin-top:5px;min-height:18px}
+.mini-chart{height:72px;background:rgba(0,0,0,0.2);display:flex;align-items:flex-end;gap:2px;padding:4px}
+.mc-bar{flex:1;min-width:3px;transition:height .3s}
+.mc-pos{background:var(--gold)}
+.mc-neg{background:var(--red)}
+</style>
+{% endblock %}
+
+{% block content %}
+<form id="game-form" method="POST" action="{{ url_for('game.run_day') }}">
+<div class="row g-4">
+
+  <!-- PANEL 1: PRONÓSTICO -->
+  <div class="col-md-3">
+    <div class="panel">
+      <div class="panel-title">◆ Pronóstico del Día</div>
+      <div class="fc-item">
+        <div class="fc-lbl">Temporada</div>
+        <div class="fc-val">{{ dia.temporada }}</div>
+      </div>
+      <div class="fc-item">
+        <div class="fc-lbl">Evento</div>
+        <div class="fc-val">{{ dia.evento }}</div>
+        <div class="fc-desc">Un día tranquilo.</div>
+      </div>
+      <div class="fc-item">
+        <div class="fc-lbl">Demanda</div>
+        <div class="demand-badge d-media">MEDIA</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 2: DECISIONES -->
+  <div class="col-md-5">
+    <div class="panel">
+      <div class="panel-title">◆ Tus Decisiones de Hoy</div>
+
+      <!-- Precio -->
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">🏷️ Precio/noche</span>
+          <span class="dec-val" id="price-disp" style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold-light)">${{ decision.precio }}</span>
+        </div>
+        <input type="range" id="price-sl" name="precio" min="40" max="500" value="{{ decision.precio }}" step="5" oninput="updateEstimate()">
+        <div class="range-lbs"><span>$40</span><span>$500</span></div>
+        <div class="hint-text" id="price-hint">Precio moderado.</div>
+      </div>
+
+      <!-- Personal -->
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">👨‍💼 Personal ($130/persona)</span>
+          <span class="dec-val" id="staff-disp">{{ decision.personal }} personas</span>
+        </div>
+        <input type="range" id="staff-sl" name="personal" min="1" max="12" value="{{ decision.personal }}" oninput="updateEstimate()">
+        <div class="range-lbs"><span>1</span><span>12</span></div>
+      </div>
+
+      <!-- Marketing -->
+      <div class="mb-3">
+        <div class="d-flex justify-content-between mb-1">
+          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">📢 Marketing</span>
+          <span class="dec-val" id="mkt-disp">${{ decision.marketing }}</span>
+        </div>
+        <input type="range" id="mkt-sl" name="marketing" min="0" max="500" value="{{ decision.marketing }}" step="25" oninput="updateEstimate()">
+        <div class="range-lbs"><span>$0</span><span>$500</span></div>
+      </div>
+
+      <!-- Amenities -->
+      <div class="mb-3">
+        <div class="dec-name mb-2" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">🛎️ Servicios</div>
+        <div class="amen-grid">
+          <div>
+            <input type="checkbox" id="cb-breakfast" name="desayuno" value="1">
+            <label for="cb-breakfast" class="d-block p-2 text-center" style="border:1px solid rgba(201,168,76,0.25);cursor:pointer">
+              <span>🍳</span><br><span style="font-size:.65rem">Desayuno +$8</span>
+            </label>
+          </div>
+          <div>
+            <input type="checkbox" id="cb-pool" name="piscina" value="1">
+            <label for="cb-pool" class="d-block p-2 text-center" style="border:1px solid rgba(201,168,76,0.25);cursor:pointer">
+              <span>🏊</span><br><span style="font-size:.65rem">Piscina $70</span>
+            </label>
+          </div>
+          <div>
+            <input type="checkbox" id="cb-spa" name="spa" value="1">
+            <label for="cb-spa" class="d-block p-2 text-center" style="border:1px solid rgba(201,168,76,0.25);cursor:pointer">
+              <span>💆</span><br><span style="font-size:.65rem">Spa $100</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estimación -->
+      <div class="est-box">
+        <div class="est-title">◆ Estimación del día</div>
+        <div class="est-row"><span class="est-lbl">Habitaciones</span><span class="est-val" id="est-rooms">~10</span></div>
+        <div class="est-row"><span class="est-lbl">Ingresos</span><span class="est-val" id="est-rev">~$1,400</span></div>
+        <div class="est-row"><span class="est-lbl">Gastos</span><span class="est-val" id="est-exp">~$880</span></div>
+        <div class="est-row" style="border-top:1px solid rgba(201,168,76,0.18);margin-top:6px;padding-top:6px">
+          <span class="est-lbl" style="font-weight:600">Balance</span>
+          <span class="est-val" id="est-profit" style="color:var(--gold-light)">~$520</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: ESTADO -->
+  <div class="col-md-3">
+    <div class="panel">
+      <div class="panel-title">◆ Estado del Hotel</div>
+      <div class="occ-lbl" style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px">Habitaciones</div>
+      <div class="room-grid" id="room-grid"></div>
+      {% if prev_resultado %}
+      <div class="stat-row mt-3">
+        <span class="sr-lbl">Ocupación ayer</span>
+        <span class="sr-val">{{ prev_resultado.habitaciones_ocupadas }}/{{ rooms_total }}</span>
+      </div>
+      <div class="stat-row">
+        <span class="sr-lbl">Ganancia ayer</span>
+        <span class="sr-val pos">+{{ "$%,.0f"|format(prev_resultado.balance) }}</span>
+      </div>
+      {% endif %}
+      <div class="stat-row">
+        <span class="sr-lbl">Reputación</span>
+        <span class="sr-val">{{ partida.reputacion }} ⭐</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTÓN FINAL -->
+<div class="text-center mt-4">
+  <button class="btn btn-gold btn-lg" id="run-btn" type="submit" onclick="submitDay(event)">
+    🏨 &nbsp;Abrir el Hotel — Día {{ partida.dia_actual }}
+  </button>
+</div>
+</form>
+
+<!-- RESULTS OVERLAY -->
+<div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,16,32,0.96);z-index:100;align-items:center;justify-content:center;flex-direction:column">
+  <div class="panel" style="max-width:460px;width:92%">
+    <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--gold);text-align:center" id="rc-title">Informe del Día {{ partida.dia_actual }}</div>
+    <div style="text-align:center;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(201,168,76,.55);margin-bottom:18px">Resumen de operaciones</div>
+    <div class="stat-row"><span class="sr-lbl">Habitaciones</span><span class="sr-val gold-c" id="rc-rooms">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">Ocupación</span><span class="sr-val gold-c" id="rc-occ">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">Ingresos</span><span class="sr-val pos" id="rc-rev">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">Gastos</span><span class="sr-val neg" id="rc-exp">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">Reputación</span><span class="sr-val" id="rc-rep">—</span></div>
+    <div style="background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.4);padding:14px;margin:16px 0;text-align:center">
+      <div style="font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px">Balance del día</div>
+      <div style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;line-height:1" id="rc-profit">$0</div>
+    </div>
+    <div id="rc-tip" style="font-style:italic;font-size:.88rem;margin-bottom:16px;color:var(--text-light)"></div>
+    <div class="text-center">
+      <button class="btn btn-gold" id="next-btn" onclick="location.reload()">Día Siguiente →</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+// Placeholder mínimo para estimación — en producción usar endpoint /game/day con método GET
+function updateEstimate() {
+  document.getElementById('price-disp').textContent = '$' + document.getElementById('price-sl').value;
+  document.getElementById('staff-disp').textContent = document.getElementById('staff-sl').value + ' personas';
+  document.getElementById('mkt-disp').textContent = '$' + document.getElementById('mkt-sl').value;
+}
+
+async function submitDay(e) {
+  e.preventDefault();
+  const form = document.getElementById('game-form');
+  const data = new FormData(form);
+  // Fetch API
+  const resp = await fetch('{{ url_for("game.run_day") }}', { method: 'POST', body: data });
+  const result = await resp.json();
+  if (resp.ok) {
+    document.getElementById('rc-rooms').textContent = result.rooms + '/20';
+    document.getElementById('rc-occ').textContent = (result.occupancy * 100).toFixed(0) + '%';
+    document.getElementById('rc-rev').textContent = '$' + result.revenue.toLocaleString('es-ES');
+    document.getElementById('rc-exp').textContent = '$' + result.expenses.toLocaleString('es-ES');
+    document.getElementById('rc-profit').textContent = (result.profit >= 0 ? '+' : '') + '$' + result.profit.toLocaleString('es-ES');
+    document.getElementById('rc-profit').style.color = result.profit >= 0 ? '#2ecc71' : '#e74c3c';
+    document.getElementById('rc-tip').textContent = result.feedback;
+    document.getElementById('results-overlay').style.display = 'flex';
+    if (result.game_over) {
+      document.getElementById('next-btn').textContent = '🏆 Ver Resultados Finales';
+    }
+  }
+}
+</script>
+{% endblock %}
