@@ -1,8 +1,8 @@
 """
 Hotel Magnifique — Flask Application Factory
 """
-from flask import Flask
-from flask_login import LoginManager
+from flask import Flask, redirect, url_for
+from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 import os
@@ -78,6 +78,21 @@ def create_app(test_config=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(game_bp)
     app.register_blueprint(admin_bp)
+
+    @app.get('/')
+    def index():
+        if not current_user.is_authenticated:
+            return redirect(url_for('auth.login'))
+
+        from app.models import Partida
+
+        partida_activa = Partida.query.filter_by(
+            usuario_id=current_user.id, activa=True
+        ).first()
+        if partida_activa:
+            return redirect(url_for('game.play'))
+
+        return redirect(url_for('game.no_game'))
 
     # ── CLI commands ─────────────────────────────────────
     @app.cli.command('init-db')

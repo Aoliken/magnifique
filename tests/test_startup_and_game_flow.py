@@ -71,6 +71,32 @@ def test_create_app_uses_local_fallbacks_when_env_is_incomplete(monkeypatch):
     assert app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite:///")
 
 
+def test_root_redirects_anonymous_users_to_login(client):
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/auth/login")
+
+
+def test_root_redirects_logged_in_users_with_active_game_to_play(app, client, user):
+    create_active_game(user)
+    login(client)
+
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/game/play")
+
+
+def test_root_redirects_logged_in_users_without_active_game_to_no_game(client, user):
+    login(client)
+
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/game/no-game")
+
+
 def test_login_redirects_to_no_game_screen_when_user_has_no_active_game(client, user):
     response = login(client, follow_redirects=True)
 
