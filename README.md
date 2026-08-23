@@ -7,6 +7,50 @@ Este juego simula los desafíos reales de la gestión hotelera. A lo largo de lo
 
 Creado por Cristian von Matuschka (Aoliken) backend con colaboración de Sergio Alonso (pankutan).
 
+## Arquitectura actual
+
+Para el despliegue actual, el punto de entrada público es `flask-app` en el puerto `5000`. No hay un proxy inverso delante de este servicio en el stack actual. Las solicitudes HTTP deben llegar a `flask-app`, que conserva las rutas de la aplicación y coordina el acceso a los demás componentes.
+
+Los GET públicos ya migrados (`/`, `/auth/login`, `/auth/register` y `/game/no-game`) se reenvían desde `flask-app` a `web-service`; el HTML generado por ese servicio se devuelve a través de Flask. Las rutas no migradas, las operaciones de autenticación y las acciones del juego permanecen atendidas por la aplicación Flask actual.
+
+```mermaid
+flowchart LR
+    browser[Navegador] --> flask[flask-app :5000]
+    browser -. "despliegue futuro" .-> nginx[Nginx]
+    nginx -. "proxy futuro" .-> flask
+
+    flask -->|GET HTML públicos migrados| web[web-service :5003]
+
+    subgraph internal[Servicios internos]
+        auth[auth-service :5001]
+        game[game-service :5002]
+    end
+
+    flask --> postgres[(PostgreSQL)]
+    auth --> postgres
+    game --> postgres
+```
+
+### Responsabilidades internas
+
+| Componente | Responsabilidad actual |
+|---|---|
+| `flask-app` | Punto de entrada público en `5000`; conserva las rutas de la aplicación, reenvía los GET públicos migrados y accede a los datos de la aplicación. |
+| `web-service` | Genera las páginas HTML públicas migradas y sirve sus recursos estáticos. |
+| `auth-service` | Gestiona la autenticación y la validación de sesiones. |
+| `game-service` | Expone la API de la simulación del juego. |
+| PostgreSQL | Almacena los datos persistentes de la aplicación. |
+
+### Plantillas y renderizado
+
+Los archivos `.ejs` son plantillas HTML del lado del servidor. En este proyecto contienen HTML y marcadores como `<%= title %>`, que se sustituyen por valores al generar la respuesta.
+
+El renderizado actual no usa Express ni el paquete npm `ejs`. `web-service` se ejecuta con el módulo integrado `http` de Node.js y un renderizador propio: lee el archivo `.ejs` y reemplaza los marcadores admitidos antes de enviar el HTML.
+
+### Nginx en producción
+
+Nginx no forma parte del stack actual ni está definido en Compose. Es una capa opcional y futura para producción: podría publicar `80` y `443` y reenviar el tráfico a `flask-app:5000`. Mientras no se incorpore esa capa, `flask-app:5000` continúa siendo el punto de entrada público.
+
 ## Despliegue local
 
 ### Prerrequisitos
