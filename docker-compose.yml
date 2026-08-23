@@ -37,7 +37,6 @@ services:
       context: .
     command:
       - gunicorn
-      - --factory
       - --bind
       - 0.0.0.0:5001
       - --workers
@@ -45,10 +44,10 @@ services:
       - --threads
       - "4"
       - --access-logfile
-      - -
+      - "-"
       - --error-logfile
-      - -
-      - services.auth_service.app:create_app
+      - "-"
+      - services.auth_service.app:create_app()
     env_file:
       - .env
     environment:
@@ -66,7 +65,6 @@ services:
       context: .
     command:
       - gunicorn
-      - --factory
       - --bind
       - 0.0.0.0:5002
       - --workers
@@ -74,10 +72,10 @@ services:
       - --threads
       - "4"
       - --access-logfile
-      - -
+      - "-"
       - --error-logfile
-      - -
-      - services.game_service.app:create_app
+      - "-"
+      - services.game_service.app:create_app()
     env_file:
       - .env
     environment:
