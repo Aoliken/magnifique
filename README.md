@@ -5,7 +5,7 @@ Objetivo del Juego: Administra el Hotel Magnifique durante 30 días consecutivos
 
 Este juego simula los desafíos reales de la gestión hotelera. A lo largo de los 30 días practicarás conceptos como: Yield Management, Costos Fijos vs Variables, Punto de Equilibrio y Gestión de Reputación.
 
-Creado por Cristian von Matuschka (Aoliken) backend con colaboración de Sergio Alonso (pankutan).
+Creado por Cristian von Matuschka (Aoliken) backend con colaboración de Sergio Alonso ([pancutan](https://about.me/elbunker)).
 
 ## Arquitectura actual
 
