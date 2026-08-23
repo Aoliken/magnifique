@@ -82,6 +82,13 @@ def create_app(test_config=None):
     @app.get('/')
     def index():
         if not current_user.is_authenticated:
+            from app.routes.auth import _proxy_web_service
+
+            proxied = _proxy_web_service('/')
+            if proxied is not None:
+                return proxied
+
+        if not current_user.is_authenticated:
             return redirect(url_for('auth.login'))
 
         from app.models import Partida

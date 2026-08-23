@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-hotel_magnifique}
+      POSTGRES_USER: ${DB_USER:-magnifique}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-magnifique}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-magnifique} -d ${DB_NAME:-hotel_magnifique}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  flask-app:
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-magnifique}:${DB_PASSWORD:-magnifique}@postgres:5432/${DB_NAME:-hotel_magnifique}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      FLASK_APP: run:app
+      WEB_SERVICE_BASE_URL: http://web-service:5003
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+
+  auth-service:
+    build:
+      context: .
+    command:
+      - gunicorn
+      - --factory
+      - --bind
+      - 0.0.0.0:5001
+      - --workers
+      - "2"
+      - --threads
+      - "4"
+      - --access-logfile
+      - -
+      - --error-logfile
+      - -
+      - services.auth_service.app:create_app
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-magnifique}:${DB_PASSWORD:-magnifique}@postgres:5432/${DB_NAME:-hotel_magnifique}
+      DB_HOST: postgres
+      DB_PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5001:5001"
+
+  game-service:
+    build:
+      context: .
+    command:
+      - gunicorn
+      - --factory
+      - --bind
+      - 0.0.0.0:5002
+      - --workers
+      - "2"
+      - --threads
+      - "4"
+      - --access-logfile
+      - -
+      - --error-logfile
+      - -
+      - services.game_service.app:create_app
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-magnifique}:${DB_PASSWORD:-magnifique}@postgres:5432/${DB_NAME:-hotel_magnifique}
+      DB_HOST: postgres
+      DB_PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "5002:5002"
+
+  web-service:
+    image: node:22-alpine
+    working_dir: /app/services/web_service
+    command:
+      - node
+      - src/server.js
+    environment:
+      PORT: 5003
+    volumes:
+      - ./services/web_service:/app/services/web_service:ro
+    ports:
+      - "5003:5003"
+
+volumes:
+  postgres-data:

@@ -1,0 +1,29 @@
+{
+  "request": {
+    "method": "GET",
+    "path": "/api/v1/games/current"
+  },
+  "response": {
+    "status": 200,
+    "body": {
+      "game": {
+        "active": true,
+        "current_day": 1
+      },
+      "day": {
+        "evento": "Día Normal ☁️",
+        "numero": 1,
+        "temporada": "Primavera 🌸"
+      },
+      "decision": {
+        "desayuno": false,
+        "marketing": 100,
+        "personal": 4,
+        "piscina": false,
+        "precio": 120,
+        "spa": false
+      },
+      "previous_result": null
+    }
+  }
+}

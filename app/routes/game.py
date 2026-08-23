@@ -2,13 +2,14 @@
 Hotel Magnifique — Game Routes
 """
 from decimal import Decimal
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, jsonify, redirect, render_template, request, url_for, flash
 from flask_login import login_required, current_user
 from app import db
 from app.models import Partida, Dia, Decision, Resultado
 from app.engine import simulation, seasons as season_engine, events as event_engine
 from app.utils.feedback import get_feedback
 from app.engine.constants import INITIAL_CAPITAL, INITIAL_REPUTATION, ROOMS_TOTAL
+from app.routes.auth import _proxy_web_service
 
 
 game_bp = Blueprint('game', __name__, url_prefix='/game')
@@ -18,6 +19,10 @@ game_bp = Blueprint('game', __name__, url_prefix='/game')
 @login_required
 def no_game():
     """Estado sin partida activa."""
+    proxied = _proxy_web_service('/game/no-game')
+    if proxied is not None:
+        return proxied
+
     return render_template('game/no_game.html')
 
 

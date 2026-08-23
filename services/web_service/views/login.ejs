@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/public/styles.css">
+  </head>
+  <body>
+    <main class="panel">
+      <h1>◆ Acceso al Hotel</h1>
+      <form method="post" action="/auth/login">
+        <label>Email <input type="email" name="email" required></label>
+        <label>Contraseña <input type="password" name="password" required></label>
+        <button type="submit">✦ Iniciar Sesión ✦</button>
+      </form>
+      <p>¿No tenés cuenta? <a href="/auth/register">Registrate</a></p>
+    </main>
+  </body>
+</html>

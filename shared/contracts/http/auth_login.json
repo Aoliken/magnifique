@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/auth/login",
+    "body": {
+      "email": "player@test.com",
+      "password": "password123"
+    }
+  },
+  "response": {
+    "status": 204,
+    "set_cookie": {
+      "name": "magnifique_session",
+      "http_only": true,
+      "same_site": "Lax",
+      "path": "/"
+    }
+  }
+}

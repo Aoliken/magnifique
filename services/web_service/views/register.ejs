@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/public/styles.css">
+  </head>
+  <body>
+    <main class="panel">
+      <h1>◆ Registro de Huésped</h1>
+      <form method="post" action="/auth/register">
+        <label>Nombre completo <input type="text" name="nombre" required></label>
+        <label>Email <input type="email" name="email" required></label>
+        <label>Contraseña <input type="password" name="password" minlength="6" required></label>
+        <button type="submit">✦ Crear Cuenta ✦</button>
+      </form>
+      <p>¿Ya tenés cuenta? <a href="/auth/login">Iniciá sesión</a></p>
+    </main>
+  </body>
+</html>

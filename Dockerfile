@@ -15,6 +15,8 @@ RUN pip install --no-cache-dir -r requirements.txt \
 # Copy only runtime sources so local .env files and development artifacts stay out of the image.
 COPY app ./app
 COPY alembic ./alembic
+COPY services ./services
+COPY scripts ./scripts
 COPY alembic.ini run.py ./
 
 RUN useradd --create-home --uid 10001 appuser \
