@@ -152,6 +152,7 @@ activemq-data/
 *.sage.py
 
 # Environments
+# Keep local credentials out of version control; use .env.example as the template.
 .env
 .envrc
 .venv
