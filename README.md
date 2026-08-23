@@ -57,6 +57,80 @@ Para iniciar en primer plano, omitir `-d`:
 docker compose down
 ```
 
+### Puertos y proxy inverso
+
+Acceder a la aplicación pública por el puerto `5000` durante el desarrollo local. En producción, Nginx debe publicar los puertos `80` y `443` y reenviar las solicitudes a `flask-app:5000`.
+
+| Puerto | Servicio | Acceso previsto | Uso |
+|---|---|---|---|
+| 5000 | `flask-app` | Público | Punto de entrada de la aplicación. |
+| 5001 | `auth-service` | Interno | Autenticación y validación de sesiones. |
+| 5002 | `game-service` | Interno | API de la simulación. |
+| 5003 | `web-service` | Interno | Renderizado web del frontend. |
+| 5432 | PostgreSQL | Solo desarrollo | Base de datos; no debe exponerse públicamente en producción. |
+
+La configuración actual de Compose publica estos puertos para el desarrollo local. En producción, no publicar `5001`, `5002`, `5003` ni `5432` en el host: deben permanecer en la red interna de Docker. El proxy debe apuntar únicamente a `flask-app:5000`.
+
+Ejemplo de bloque de servidor Nginx:
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location / {
+        proxy_pass http://flask-app:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Restablecer la contraseña de un administrador
+
+Abrir la consola de Flask en el mismo entorno y contra la misma base de datos que usa la aplicación:
+
+```shell
+conda activate py3.12
+flask --app run:app shell
+```
+
+En la consola, listar únicamente las cuentas administradoras y confirmar la identidad por un ID o correo electrónico conocido. No seleccionar una cuenta por coincidencias parciales:
+
+```python
+from getpass import getpass
+from app import db
+from app.models import Usuario
+
+for user_id, email, nombre in db.session.query(
+    Usuario.id, Usuario.email, Usuario.nombre
+).filter_by(rol="admin").all():
+    print(user_id, email, nombre)
+```
+
+Una vez identificado el ID correcto, restablecer la contraseña. `getpass()` no muestra la contraseña; no escribirla en el comando, no imprimirla y no guardarla en archivos ni en el historial:
+
+```python
+admin_id = "<known-admin-id>"
+admin = db.session.get(Usuario, admin_id)
+
+if admin is None or not admin.is_admin():
+    raise RuntimeError("El usuario seleccionado no es administrador")
+
+new_password = getpass("Nueva contraseña: ")
+confirmation = getpass("Confirmar nueva contraseña: ")
+if new_password != confirmation:
+    raise RuntimeError("Las contraseñas no coinciden")
+
+admin.set_password(new_password)
+db.session.commit()
+del new_password, confirmation
+```
+
+Este procedimiento actualiza solamente una cuenta existente y usa `Usuario.set_password()`, que genera el hash bcrypt compatible con el inicio de sesión. El único valor persistido es el hash; la contraseña en texto plano no se registra ni se almacena. Si no se puede confirmar la identidad del administrador, detenerse y solicitar acceso al responsable de la base de datos.
+
 ## Antes de hacer `git push` del proyecto
 
 ```bash
