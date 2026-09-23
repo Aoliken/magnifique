@@ -2,17 +2,36 @@
 Hotel Magnifique — Game Routes
 """
 from decimal import Decimal
-from flask import Blueprint, jsonify, redirect, render_template, request, url_for, flash
-from flask_login import login_required, current_user
+from pathlib import Path
+
+from flask import Blueprint, abort, current_app, flash, jsonify, redirect, render_template, request, send_file, url_for
+from flask_login import current_user, login_required
 from app import db
-from app.models import Partida, Dia, Decision, Resultado
+from app.models import Configuracion, Partida, Dia, Decision, Resultado, Usuario
 from app.engine import simulation, seasons as season_engine, events as event_engine
 from app.utils.feedback import get_feedback
 from app.engine.constants import INITIAL_CAPITAL, INITIAL_REPUTATION, ROOMS_TOTAL
 from app.routes.auth import _proxy_web_service
+from app.utils.preferences import (
+    CURRENCY_CODES,
+    CURRENCY_SYMBOLS,
+    DIFFICULTY_CODES,
+    LANGUAGE_CODES,
+    translate,
+)
 
 
 game_bp = Blueprint('game', __name__, url_prefix='/game')
+
+
+def _get_or_create_config(usuario_id: str) -> Configuracion:
+    """Returns the player's saved preferences, creating defaults on first access."""
+    config = Configuracion.query.filter_by(usuario_id=usuario_id).first()
+    if config is None:
+        config = Configuracion(usuario_id=usuario_id)
+        db.session.add(config)
+        db.session.commit()
+    return config
 
 
 @game_bp.route('/no-game', methods=['GET'])
@@ -26,28 +45,152 @@ def no_game():
     return render_template('game/no_game.html')
 
 
+@game_bp.route('/menu', methods=['GET'])
+@login_required
+def menu():
+    """Menú principal tras iniciar sesión."""
+    partida_activa = Partida.query.filter_by(
+        usuario_id=current_user.id, activa=True
+    ).first()
+    config = _get_or_create_config(current_user.id)
+    tr = translate(config.idioma)
+    return render_template(
+        'game/menu.html',
+        partida=partida_activa,
+        config=config,
+        tr=tr,
+        moneda=config.moneda,
+    )
+
+
+@game_bp.route('/options', methods=['GET'])
+@login_required
+def options():
+    """Pantalla de opciones (idioma, moneda, dificultad)."""
+    config = _get_or_create_config(current_user.id)
+    tr = translate(config.idioma)
+    return render_template(
+        'game/options.html',
+        config=config,
+        tr=tr,
+    )
+
+
+@game_bp.route('/options', methods=['POST'])
+@login_required
+def save_options():
+    """Guardar opciones de idioma, moneda y dificultad."""
+    config = _get_or_create_config(current_user.id)
+
+    idioma = request.form.get('idioma', '')
+    moneda = request.form.get('moneda', '')
+    dificultad = request.form.get('dificultad', '')
+
+    if (
+        idioma not in LANGUAGE_CODES
+        or moneda not in CURRENCY_CODES
+        or dificultad not in DIFFICULTY_CODES
+    ):
+        flash(translate(config.idioma)['invalid_options'], 'error')
+        return redirect(url_for('game.options'))
+
+    config.idioma = idioma
+    config.moneda = moneda
+    config.dificultad = dificultad
+    db.session.commit()
+
+    flash(translate(idioma)['saved'], 'success')
+    return redirect(url_for('game.options'))
+
+
+@game_bp.route('/tutorial', methods=['GET'])
+@login_required
+def tutorial():
+    """Tutorial del juego (manual del jugador)."""
+    config = _get_or_create_config(current_user.id)
+    tr = translate(config.idioma)
+    return render_template('game/tutorial.html', tr=tr)
+
+
+@game_bp.route('/manual', methods=['GET'])
+@login_required
+def manual():
+    """Sirve el manual del jugador (manual-hotel-magnifique.html)."""
+    manual_path = Path(current_app.root_path).parent / 'manual-hotel-magnifique.html'
+    if not manual_path.is_file():
+        abort(404)
+    return send_file(manual_path)
+
+
+@game_bp.route('/ranking', methods=['GET'])
+@login_required
+def ranking():
+    """Ranking de los mejores jugadores (partidas terminadas)."""
+    config = _get_or_create_config(current_user.id)
+    tr = translate(config.idioma)
+
+    finished = (
+        Partida.query
+        .join(Usuario, Usuario.id == Partida.usuario_id)
+        .filter(Partida.activa.is_(False), Partida.grado_final.isnot(None))
+        .order_by(
+            Partida.ganancia_total.desc(),
+            Partida.reputacion.desc(),
+            Partida.updated_at.asc(),
+        )
+        .all()
+    )
+
+    # Mejor partida por jugador (hasta 10 jugadores distintos)
+    top: list[Partida] = []
+    seen: set[str] = set()
+    for partida in finished:
+        if partida.usuario_id in seen:
+            continue
+        seen.add(partida.usuario_id)
+        top.append(partida)
+        if len(top) >= 10:
+            break
+
+    return render_template(
+        'game/ranking.html',
+        top=top,
+        tr=tr,
+        moneda=config.moneda,
+    )
+
+
 @game_bp.route('/new', methods=['POST'])
 @login_required
 def new_game():
-    """Crear nueva partida de 30 días."""
-    # Si ya tiene partida activa, no crear otra
-    activa = Partida.query.filter_by(
+    """Crear nueva partida de 30 días.
+
+    - Sin partida activa: crea una nueva (día 1).
+    - Con partida activa sin `force`: reutiliza la existente (no se pierde progreso).
+    - Con partida activa y `force=1`: archiva la actual y crea una partida fresca.
+    """
+    partida_activa = Partida.query.filter_by(
         usuario_id=current_user.id, activa=True
     ).first()
-    if activa:
-        return redirect(url_for('game.play'))
+    if partida_activa:
+        if request.form.get('force') != '1':
+            return redirect(url_for('game.play'))
+        partida_activa.activa = False
+        db.session.commit()
 
+    config = _get_or_create_config(current_user.id)
     partida = Partida(
         usuario_id=current_user.id,
         dia_actual=1,
         capital=INITIAL_CAPITAL,
         reputacion=INITIAL_REPUTATION,
         activa=True,
+        dificultad=config.dificultad,
     )
     db.session.add(partida)
     db.session.commit()
 
-    flash('¡Nueva partida iniciada! Día 1 de 30.', 'success')
+    flash(translate(config.idioma)['new_ok'], 'success')
     return redirect(url_for('game.play'))
 
 
@@ -67,7 +210,8 @@ def final_results():
     if not partida or not partida.grado_final:
         return redirect(url_for('game.no_game'))
 
-    return render_template('game/end.html', partida=partida)
+    return render_template('game/end.html', partida=partida,
+        moneda=_get_or_create_config(current_user.id).moneda)
 
 
 @game_bp.route('/play', methods=['GET'])
@@ -79,7 +223,7 @@ def play():
     ).first()
 
     if not partida:
-        return redirect(url_for('game.no_game'))
+        return redirect(url_for('game.menu'))
 
     dia = Dia.query.filter_by(
         partida_id=partida.id, numero=partida.dia_actual
@@ -127,6 +271,7 @@ def play():
         decision=decision,
         prev_resultado=prev_resultado,
         rooms_total=ROOMS_TOTAL,
+        moneda=_get_or_create_config(current_user.id).moneda,
     )
 
 
@@ -179,6 +324,7 @@ def run_day():
         season=season,
         event=event,
         add_noise=True,
+        dificultad=partida.dificultad or 'media',
     )
 
     # Guardar resultado

@@ -68,7 +68,7 @@ def create_app(test_config=None):
 
     # ── Importar modelos (después de db.init_app) ─────
     # Se importan aquí para que Alembic los detecte
-    from app.models import Usuario, Partida, Dia, Decision, Resultado, Ajuste
+    from app.models import Usuario, Partida, Dia, Decision, Resultado, Ajuste, Configuracion
 
     # ── Blueprints ────────────────────────────────────────
     from app.routes.auth import auth_bp
@@ -78,6 +78,40 @@ def create_app(test_config=None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(game_bp)
     app.register_blueprint(admin_bp)
+
+    from app.utils.preferences import (
+        DEFAULT_LANGUAGE,
+        LOCALES,
+        money as _money,
+        translate as _translate,
+    )
+
+    @app.context_processor
+    def inject_i18n():
+        """Expone helpers de lenguaje en todas las plantillas.
+
+        - ``money``: formatea un importe con el símbolo de la moneda.
+        - ``tr``: diccionario de traducciones para el idioma del jugador.
+        - ``lang``: código de idioma activo (p. ej. ``es``).
+        - ``js_locale``: locale ECMAScript para ``toLocaleString``.
+        """
+        lang = DEFAULT_LANGUAGE
+        if current_user.is_authenticated:
+            from app.models import Configuracion
+
+            config = Configuracion.query.filter_by(
+                usuario_id=current_user.id
+            ).first()
+            if config is not None:
+                lang = config.idioma
+        if lang not in LOCALES:
+            lang = DEFAULT_LANGUAGE
+        return {
+            'money': _money,
+            'tr': _translate(lang),
+            'lang': lang,
+            'js_locale': LOCALES.get(lang, LOCALES[DEFAULT_LANGUAGE]),
+        }
 
     @app.get('/')
     def index():
@@ -96,10 +130,7 @@ def create_app(test_config=None):
         partida_activa = Partida.query.filter_by(
             usuario_id=current_user.id, activa=True
         ).first()
-        if partida_activa:
-            return redirect(url_for('game.play'))
-
-        return redirect(url_for('game.no_game'))
+        return redirect(url_for('game.menu'))
 
     # ── CLI commands ─────────────────────────────────────
     @app.cli.command('init-db')

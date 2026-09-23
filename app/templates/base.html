@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,28 +39,30 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;hei
 </head>
 <body>
 <nav class="navbar navbar-expand-lg">
+  {% block navbar %}
   <div class="container-fluid d-flex align-items-center justify-content-between">
     <div class="hotel-logo">✦ Hotel Magnifique</div>
     <div class="d-flex gap-4">
       <div class="stat-chip">
-        <div class="sc-label">Día</div>
+        <div class="sc-label">{{ tr.nav_day }}</div>
         <div class="sc-value">{% block nav_day %}{% endblock %}</div>
       </div>
       <div class="stat-chip">
-        <div class="sc-label">Capital</div>
+        <div class="sc-label">{{ tr.nav_capital }}</div>
         <div class="sc-value" id="money-disp">{% block nav_money %}{% endblock %}</div>
       </div>
       <div class="stat-chip">
-        <div class="sc-label">Reputación</div>
+        <div class="sc-label">{{ tr.nav_rep }}</div>
         <div class="sc-value">{% block nav_rep %}{% endblock %}</div>
       </div>
     </div>
     {% if current_user.is_authenticated %}
     <form action="{{ url_for('auth.logout') }}" method="POST">
-      <button class="btn btn-sm btn-outline-warning" type="submit">Cerrar sesión</button>
+      <button class="btn btn-sm btn-outline-warning" type="submit">{{ tr.logout }}</button>
     </form>
     {% endif %}
   </div>
+  {% endblock %}
 </nav>
 
 <main class="container-fluid py-4">
