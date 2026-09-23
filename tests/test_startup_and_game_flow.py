@@ -78,30 +78,30 @@ def test_root_redirects_anonymous_users_to_login(client):
     assert response.headers["Location"].endswith("/auth/login")
 
 
-def test_root_redirects_logged_in_users_with_active_game_to_play(app, client, user):
+def test_root_redirects_logged_in_users_with_active_game_to_menu(app, client, user):
     create_active_game(user)
     login(client)
 
     response = client.get("/", follow_redirects=False)
 
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/game/play")
+    assert response.headers["Location"].endswith("/game/menu")
 
 
-def test_root_redirects_logged_in_users_without_active_game_to_no_game(client, user):
+def test_root_redirects_logged_in_users_without_active_game_to_menu(client, user):
     login(client)
 
     response = client.get("/", follow_redirects=False)
 
     assert response.status_code == 302
-    assert response.headers["Location"].endswith("/game/no-game")
+    assert response.headers["Location"].endswith("/game/menu")
 
 
-def test_login_redirects_to_no_game_screen_when_user_has_no_active_game(client, user):
+def test_login_redirects_to_menu_screen_when_user_has_no_active_game(client, user):
     response = login(client, follow_redirects=True)
 
     assert response.status_code == 200
-    assert b"Nueva partida" in response.data
+    assert b"Comenzar juego" in response.data
 
 
 def test_run_day_updates_decision_columns_and_advances_day(app, client, user):

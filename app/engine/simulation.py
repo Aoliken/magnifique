@@ -47,6 +47,7 @@ def simulate(
     season: Season,
     event: GameEvent,
     add_noise: bool = True,
+    dificultad: str = 'media',
 ) -> SimulationResult:
     """
     Función core del juego.
@@ -57,11 +58,25 @@ def simulate(
     4. Ajusta por marketing y amenities
     5. Calcula ocupación con ruido opcional
     6. Calcula ingresos, gastos y reputación
+
+    `dificultad` ('facil' | 'media' | 'dificil') altera la demanda:
+      - facil:   demanda alta casi todos los días (multiplicador fijo) y menos ruido.
+      - media:   comportamiento por defecto (sin cambios).
+      - dificil: cambios de demanda abruptos (multiplicador aleatorio amplio y más ruido).
     """
     rep = float(current_reputation)
 
     # 1. Demanda base
     demand = float(season.factor) * float(event.mod) * (0.74 + rep * 0.085)
+
+    # Dificultad — ajusta la demanda antes del resto del cálculo
+    noise_amp = 0.08
+    if dificultad == 'facil':
+        demand *= 1.25
+        noise_amp = 0.04
+    elif dificultad == 'dificil':
+        demand *= random.uniform(0.70, 1.40)
+        noise_amp = 0.16
 
     # 2. Precio óptimo (varía con reputación y temporada)
     opt_price = (55 + rep * 22) * (0.55 + float(season.factor) * 0.88)
@@ -89,7 +104,7 @@ def simulate(
     # 6. Ocupación
     occupancy = demand * pf * mf * af
     if add_noise:
-        occupancy += (random.random() - 0.5) * 0.08
+        occupancy += (random.random() - 0.5) * noise_amp
     occupancy = max(0.02, min(1.0, occupancy))
 
     rooms_occupied = round(occupancy * ROOMS_TOTAL)

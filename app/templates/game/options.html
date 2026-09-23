@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tr['options_title'] }} — Hotel Magnifique{% endblock %}
+
+{% block navbar %}
+<div class="container-fluid d-flex align-items-center justify-content-between">
+  <div class="hotel-logo">✦ Hotel Magnifique</div>
+  <div class="d-flex align-items-center gap-2">
+    <form action="{{ url_for('auth.logout') }}" method="POST">
+      <button class="btn btn-sm btn-outline-warning" type="submit">{{ tr['logout'] }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+.opt-wrap{max-width:620px;margin:40px auto 0}
+.opt-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;color:var(--gold);text-align:center;letter-spacing:.05em}
+.opt-sub{text-align:center;font-size:.85rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(201,168,76,.6);margin-bottom:26px}
+.opt-field{margin-bottom:20px}
+.opt-label{display:block;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.opt-select{width:100%;background:var(--navy);color:var(--cream);border:1px solid rgba(201,168,76,.35);padding:12px 14px;font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem}
+.opt-hint{font-size:.8rem;color:var(--text-light);font-style:italic;margin-top:5px}
+.opt-flash{text-align:center;margin-bottom:14px}
+</style>
+{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="opt-flash">
+    {% for category, message in messages %}
+    <span class="badge text-bg-{{ 'success' if category == 'success' else 'danger' }}" style="font-size:.9rem">{{ message }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<div class="opt-wrap">
+  <div class="opt-title">⚙️ {{ tr['options_title'] }}</div>
+  <div class="opt-sub">— {{ tr['options_hint'] }} —</div>
+
+  <div class="panel">
+    <form method="POST" action="{{ url_for('game.save_options') }}">
+      <div class="opt-field">
+        <label class="opt-label" for="opt-lang">{{ tr['language'] }}</label>
+        <select class="opt-select" id="opt-lang" name="idioma">
+          {% for code, name in [('es','Español'),('en','English'),('fr','Français'),('de','Deutsch'),('it','Italiano')] %}
+          <option value="{{ code }}" {{ 'selected' if config.idioma == code }}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="opt-field">
+        <label class="opt-label" for="opt-cur">{{ tr['currency'] }}</label>
+        <select class="opt-select" id="opt-cur" name="moneda">
+          {% for code, name in [('eur','Euro (€)'),('usd','US Dollar ($)'),('ars','Peso argentino (ARS$)')] %}
+          <option value="{{ code }}" {{ 'selected' if config.moneda == code }}>{{ name }}</option>
+          {% endfor %}
+        </select>
+        <div class="opt-hint">{{ money(1234, config.moneda) }}</div>
+      </div>
+
+      <div class="opt-field">
+        <label class="opt-label" for="opt-diff">{{ tr['difficulty'] }}</label>
+        <select class="opt-select" id="opt-diff" name="dificultad">
+          {% for code, name in [('facil','Fácil'),('media','Media'),('dificil','Difícil')] %}
+          <option value="{{ code }}" {{ 'selected' if config.dificultad == code }}>{{ name }}</option>
+          {% endfor %}
+        </select>
+        <div class="opt-hint">
+          {% if config.dificultad == 'facil' %}{{ tr['difficulty_easy'] }}{% elif config.dificultad == 'dificil' %}{{ tr['difficulty_hard'] }}{% else %}{{ tr['difficulty_medium'] }}{% endif %}
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="{{ url_for('game.menu') }}" class="btn btn-sm btn-outline-warning">{{ tr['back'] }}</a>
+        <button class="btn btn-gold" type="submit">{{ tr['save'] }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+(function () {
+  const hintMap = {
+    facil: {{ tr['difficulty_easy']|tojson }},
+    media: {{ tr['difficulty_medium']|tojson }},
+    dificil: {{ tr['difficulty_hard']|tojson }},
+  };
+  const select = document.getElementById('opt-diff');
+  const hint = select.closest('.opt-field').querySelector('.opt-hint');
+  select.addEventListener('change', function () {
+    hint.textContent = hintMap[select.value] || '';
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tr['new_game'] }} — Hotel Magnifique{% endblock %}
+
+{% block navbar %}
+<div class="container-fluid d-flex align-items-center justify-content-between">
+  <div class="hotel-logo">✦ Hotel Magnifique</div>
+  <div class="d-flex align-items-center gap-2">
+    {% if partida %}
+    <div class="stat-chip">
+      <div class="sc-label">{{ tr['nav_day'] }}</div>
+      <div class="sc-value">{{ partida.dia_actual }} / 30</div>
+    </div>
+    <div class="stat-chip">
+      <div class="sc-label">{{ tr['nav_capital'] }}</div>
+      <div class="sc-value">{{ money(partida.capital, moneda) }}</div>
+    </div>
+    <div class="stat-chip">
+      <div class="sc-label">{{ tr['nav_rep'] }}</div>
+      <div class="sc-value">{{ partida.reputacion }}</div>
+    </div>
+    {% endif %}
+    <form action="{{ url_for('auth.logout') }}" method="POST">
+      <button class="btn btn-sm btn-outline-warning" type="submit">{{ tr['logout'] }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+.menu-hero{text-align:center;padding:34px 0 6px}
+.menu-title{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,4rem);font-weight:900;color:var(--gold);letter-spacing:.04em}
+.menu-tagline{color:rgba(201,168,76,.7);letter-spacing:.35em;text-transform:uppercase;margin-top:8px;font-size:.85rem}
+.menu-welcome{margin-top:14px;font-size:1.05rem;color:var(--text-light)}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;max-width:980px;margin:30px auto 0}
+.menu-card{background:var(--navy-mid);border:1px solid rgba(201,168,76,.22);border-top:3px solid var(--gold);padding:20px;text-align:left;transition:all .25s;cursor:pointer;color:var(--cream);font:inherit}
+.menu-card:hover{transform:translateY(-3px);box-shadow:0 10px 34px rgba(201,168,76,.28);border-color:rgba(201,168,76,.55)}
+.menu-card .mc-icon{font-size:1.7rem}
+.menu-card .mc-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--gold-light);letter-spacing:.08em;margin-top:6px}
+.menu-card .mc-desc{font-size:.85rem;color:var(--text-light);margin-top:4px;line-height:1.55}
+.menu-card.disabled{opacity:.45;cursor:not-allowed}
+.menu-card.disabled:hover{transform:none;box-shadow:none}
+.salir-card{background:rgba(231,76,60,.08);border-top-color:var(--red)}
+.game-banner{max-width:980px;margin:22px auto 0;background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(201,168,76,.04));border:1px solid rgba(201,168,76,.35);padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.game-banner .gb-title{font-family:'Playfair Display',serif;color:var(--gold-light);font-size:1.05rem;letter-spacing:.1em;text-transform:uppercase}
+.game-banner .gb-sub{font-size:.88rem;color:var(--text-light);margin-top:2px}
+.btn-menu{display:block;width:100%;border:none;background:none;text-align:left;color:inherit}
+.menu-flash{margin-top:14px}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="menu-hero">
+  <div class="menu-title">✦ Hotel Magnifique</div>
+  <div class="menu-tagline">{{ tr['tagline'] }}</div>
+  <div class="menu-welcome">{{ tr['welcome'].format(name=current_user.nombre) }}</div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="menu-flash text-center">
+    {% for category, message in messages %}
+    <span class="badge text-bg-{{ 'success' if category == 'success' else 'danger' }}" style="font-size:.85rem">{{ message }}</span>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+{% if partida %}
+<div class="game-banner">
+  <div>
+    <div class="gb-title">{{ tr['active_game'].format(day=partida.dia_actual) }}</div>
+    <div class="gb-sub">{{ tr['nav_capital'] }}: <strong class="gold-c">{{ money(partida.capital, moneda) }}</strong> &nbsp;·&nbsp; {{ tr['nav_rep'] }}: <strong class="gold-c">{{ partida.reputacion }}</strong></div>
+  </div>
+  <a href="{{ url_for('game.play') }}" class="btn btn-gold btn-sm">{{ tr['continue_game'] }} →</a>
+</div>
+{% else %}
+<div class="game-banner" style="justify-content:center">
+  <div class="gb-sub" style="margin:0">{{ tr['no_active_game'] }}</div>
+</div>
+{% endif %}
+
+<div class="menu-grid" id="menu-grid">
+
+  <!-- Comenzar juego -->
+  <form method="POST" action="{{ url_for('game.new_game') }}" id="form-new-game" data-has-active="{{ '1' if partida else '0' }}" data-confirm="{{ tr['confirm_new'].format(day=partida.dia_actual) if partida else '' }}">
+    <button class="menu-card" type="submit" style="width:100%;border:none">
+      <div class="mc-icon">🏨</div>
+      <div class="mc-title">{{ tr['new_game'] }}</div>
+      <div class="mc-desc">{{ tr['new_game_hint'] }}</div>
+    </button>
+    <input type="hidden" name="force" id="force-new" value="0">
+  </form>
+
+  <!-- Continuar partida -->
+  {% if partida %}
+  <a class="menu-card" href="{{ url_for('game.play') }}">
+    <div class="mc-icon">▶️</div>
+    <div class="mc-title">{{ tr['continue_game'] }}</div>
+    <div class="mc-desc">{{ tr['continue_game_hint'] }}</div>
+  </a>
+  {% else %}
+  <div class="menu-card disabled" title="{{ tr['continue_disabled'] }}">
+    <div class="mc-icon">▶️</div>
+    <div class="mc-title">{{ tr['continue_game'] }}</div>
+    <div class="mc-desc">{{ tr['continue_disabled'] }}</div>
+  </div>
+  {% endif %}
+
+  <!-- Tutorial -->
+  <a class="menu-card" href="{{ url_for('game.tutorial') }}">
+    <div class="mc-icon">📖</div>
+    <div class="mc-title">{{ tr['tutorial'] }}</div>
+    <div class="mc-desc">{{ tr['tutorial_hint'] }}</div>
+  </a>
+
+  <!-- Opciones -->
+  <a class="menu-card" href="{{ url_for('game.options') }}">
+    <div class="mc-icon">⚙️</div>
+    <div class="mc-title">{{ tr['options'] }}</div>
+    <div class="mc-desc">{{ tr['options_hint'] }}</div>
+  </a>
+
+  <!-- Ranking -->
+  <a class="menu-card" href="{{ url_for('game.ranking') }}">
+    <div class="mc-icon">🏆</div>
+    <div class="mc-title">{{ tr['ranking'] }}</div>
+    <div class="mc-desc">{{ tr['ranking_hint'] }}</div>
+  </a>
+
+  <!-- Salir -->
+  <form method="POST" action="{{ url_for('auth.logout') }}">
+    <button class="menu-card salir-card" type="submit" style="width:100%;border:none">
+      <div class="mc-icon">🚪</div>
+      <div class="mc-title">{{ tr['exit'] }}</div>
+      <div class="mc-desc">{{ tr['exit_hint'] }}</div>
+    </button>
+  </form>
+
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+(function () {
+  const form = document.getElementById('form-new-game');
+  if (!form) return;
+  form.addEventListener('submit', function (event) {
+    if (form.dataset.hasActive === '1' && !window.confirm(form.dataset.confirm)) {
+      event.preventDefault();
+      return;
+    }
+    document.getElementById('force-new').value = form.dataset.hasActive === '1' ? '1' : '0';
+  });
+})();
+</script>
+{% endblock %}

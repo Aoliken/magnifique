@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 
 {% block nav_day %}{{ partida.dia_actual }} / 30{% endblock %}
-{% block nav_money %}${{ "{:,}".format(partida.capital|int) }}{% endblock %}
+{% block nav_money %}{{ money(partida.capital, moneda) }}{% endblock %}
 {% block nav_rep %}{{ partida.reputacion }}{% endblock %}
+
+{% set money_symbol = {'eur': '€', 'usd': '$', 'ars': 'ARS$'}.get(moneda, '$') %}
 
 {% block extra_style %}
 <style>
@@ -32,19 +34,19 @@
   <!-- PANEL 1: PRONÓSTICO -->
   <div class="col-md-3">
     <div class="panel">
-      <div class="panel-title">◆ Pronóstico del Día</div>
+      <div class="panel-title">{{ tr.forecast_title }}</div>
       <div class="fc-item">
-        <div class="fc-lbl">Temporada</div>
+        <div class="fc-lbl">{{ tr.season }}</div>
         <div class="fc-val">{{ dia.temporada }}</div>
       </div>
       <div class="fc-item">
-        <div class="fc-lbl">Evento</div>
+        <div class="fc-lbl">{{ tr.event }}</div>
         <div class="fc-val">{{ dia.evento }}</div>
-        <div class="fc-desc">Un día tranquilo.</div>
+        <div class="fc-desc">{{ tr.event_quiet }}</div>
       </div>
       <div class="fc-item">
-        <div class="fc-lbl">Demanda</div>
-        <div class="demand-badge d-media">MEDIA</div>
+        <div class="fc-lbl">{{ tr.demand }}</div>
+        <div class="demand-badge d-media">{{ tr.demand_medium }}</div>
       </div>
     </div>
   </div>
@@ -52,24 +54,24 @@
   <!-- PANEL 2: DECISIONES -->
   <div class="col-md-5">
     <div class="panel">
-      <div class="panel-title">◆ Tus Decisiones de Hoy</div>
+      <div class="panel-title">{{ tr.decisions_title }}</div>
 
       <!-- Precio -->
       <div class="mb-3">
         <div class="d-flex justify-content-between mb-1">
-          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">🏷️ Precio/noche</span>
-          <span class="dec-val" id="price-disp" style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold-light)">${{ decision.precio }}</span>
+          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">{{ tr.price_night }}</span>
+          <span class="dec-val" id="price-disp" style="font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gold-light)">{{ money(decision.precio, moneda) }}</span>
         </div>
         <input type="range" id="price-sl" name="precio" min="40" max="500" value="{{ decision.precio }}" step="5" oninput="updateEstimate()">
-        <div class="range-lbs"><span>$40</span><span>$500</span></div>
-        <div class="hint-text" id="price-hint">Precio moderado.</div>
+        <div class="range-lbs"><span>{{ money(40, moneda) }}</span><span>{{ money(500, moneda) }}</span></div>
+        <div class="hint-text" id="price-hint">{{ tr.price_hint_moderate }}</div>
       </div>
 
       <!-- Personal -->
       <div class="mb-3">
         <div class="d-flex justify-content-between mb-1">
-          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">👨‍💼 Personal ($130/persona)</span>
-          <span class="dec-val" id="staff-disp">{{ decision.personal }} personas</span>
+          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">{{ tr.staff_line|replace('{price}', money(130, moneda)) }}</span>
+          <span class="dec-val" id="staff-disp">{{ decision.personal }} {{ tr.persons }}</span>
         </div>
         <input type="range" id="staff-sl" name="personal" min="1" max="12" value="{{ decision.personal }}" oninput="updateEstimate()">
         <div class="range-lbs"><span>1</span><span>12</span></div>
@@ -78,33 +80,33 @@
       <!-- Marketing -->
       <div class="mb-3">
         <div class="d-flex justify-content-between mb-1">
-          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">📢 Marketing</span>
-          <span class="dec-val" id="mkt-disp">${{ decision.marketing }}</span>
+          <span class="dec-name" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">{{ tr.marketing_label }}</span>
+          <span class="dec-val" id="mkt-disp">{{ money(decision.marketing, moneda) }}</span>
         </div>
         <input type="range" id="mkt-sl" name="marketing" min="0" max="500" value="{{ decision.marketing }}" step="25" oninput="updateEstimate()">
-        <div class="range-lbs"><span>$0</span><span>$500</span></div>
+        <div class="range-lbs"><span>{{ money(0, moneda) }}</span><span>{{ money(500, moneda) }}</span></div>
       </div>
 
       <!-- Amenities -->
       <div class="mb-3">
-        <div class="dec-name mb-2" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">🛎️ Servicios</div>
+        <div class="dec-name mb-2" style="font-size:.75rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65)">{{ tr.services_label }}</div>
         <div class="amen-grid">
           <div>
             <input type="checkbox" id="cb-breakfast" name="desayuno" value="1">
             <label for="cb-breakfast" class="d-block p-2 text-center" style="border:1px solid rgba(201,168,76,0.25);cursor:pointer">
-              <span>🍳</span><br><span style="font-size:.65rem">Desayuno +$8</span>
+              <span>🍳</span><br><span style="font-size:.65rem">{{ tr.breakfast }} +{{ money(8, moneda) }}</span>
             </label>
           </div>
           <div>
             <input type="checkbox" id="cb-pool" name="piscina" value="1">
             <label for="cb-pool" class="d-block p-2 text-center" style="border:1px solid rgba(201,168,76,0.25);cursor:pointer">
-              <span>🏊</span><br><span style="font-size:.65rem">Piscina $70</span>
+              <span>🏊</span><br><span style="font-size:.65rem">{{ tr.pool }} {{ money(70, moneda) }}</span>
             </label>
           </div>
           <div>
             <input type="checkbox" id="cb-spa" name="spa" value="1">
             <label for="cb-spa" class="d-block p-2 text-center" style="border:1px solid rgba(201,168,76,0.25);cursor:pointer">
-              <span>💆</span><br><span style="font-size:.65rem">Spa $100</span>
+              <span>💆</span><br><span style="font-size:.65rem">{{ tr.spa }} {{ money(100, moneda) }}</span>
             </label>
           </div>
         </div>
@@ -112,13 +114,13 @@
 
       <!-- Estimación -->
       <div class="est-box">
-        <div class="est-title">◆ Estimación del día</div>
-        <div class="est-row"><span class="est-lbl">Habitaciones</span><span class="est-val" id="est-rooms">~10</span></div>
-        <div class="est-row"><span class="est-lbl">Ingresos</span><span class="est-val" id="est-rev">~$1,400</span></div>
-        <div class="est-row"><span class="est-lbl">Gastos</span><span class="est-val" id="est-exp">~$880</span></div>
+        <div class="est-title">{{ tr.estimate_title }}</div>
+        <div class="est-row"><span class="est-lbl">{{ tr.rooms }}</span><span class="est-val" id="est-rooms">~10</span></div>
+        <div class="est-row"><span class="est-lbl">{{ tr.revenue }}</span><span class="est-val" id="est-rev">~{{ money(1400, moneda) }}</span></div>
+        <div class="est-row"><span class="est-lbl">{{ tr.expenses }}</span><span class="est-val" id="est-exp">~{{ money(880, moneda) }}</span></div>
         <div class="est-row" style="border-top:1px solid rgba(201,168,76,0.18);margin-top:6px;padding-top:6px">
-          <span class="est-lbl" style="font-weight:600">Balance</span>
-          <span class="est-val" id="est-profit" style="color:var(--gold-light)">~$520</span>
+          <span class="est-lbl" style="font-weight:600">{{ tr.balance }}</span>
+          <span class="est-val" id="est-profit" style="color:var(--gold-light)">~{{ money(520, moneda) }}</span>
         </div>
       </div>
     </div>
@@ -127,21 +129,21 @@
   <!-- PANEL 3: ESTADO -->
   <div class="col-md-3">
     <div class="panel">
-      <div class="panel-title">◆ Estado del Hotel</div>
-      <div class="occ-lbl" style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px">Habitaciones</div>
+      <div class="panel-title">{{ tr.hotel_state }}</div>
+      <div class="occ-lbl" style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px">{{ tr.rooms }}</div>
       <div class="room-grid" id="room-grid"></div>
       {% if prev_resultado %}
       <div class="stat-row mt-3">
-        <span class="sr-lbl">Ocupación ayer</span>
+        <span class="sr-lbl">{{ tr.occupancy_yesterday }}</span>
         <span class="sr-val">{{ prev_resultado.habitaciones_ocupadas }}/{{ rooms_total }}</span>
       </div>
       <div class="stat-row">
-        <span class="sr-lbl">Ganancia ayer</span>
-        <span class="sr-val pos">+{{ "${:,.0f}".format(prev_resultado.balance) }}</span>
+        <span class="sr-lbl">{{ tr.profit_yesterday }}</span>
+        <span class="sr-val pos">{% if prev_resultado.balance > 0 %}+{% endif %}{{ money(prev_resultado.balance, moneda) }}</span>
       </div>
       {% endif %}
       <div class="stat-row">
-        <span class="sr-lbl">Reputación</span>
+        <span class="sr-lbl">{{ tr.reputation }}</span>
         <span class="sr-val">{{ partida.reputacion }} ⭐</span>
       </div>
     </div>
@@ -152,7 +154,7 @@
 <!-- BOTÓN FINAL -->
 <div class="text-center mt-4">
   <button class="btn btn-gold btn-lg" id="run-btn" type="submit" onclick="submitDay(event)">
-    🏨 &nbsp;Abrir el Hotel — Día {{ partida.dia_actual }}
+    {{ tr.open_hotel|replace('{day}', partida.dia_actual) }}
   </button>
 </div>
 </form>
@@ -160,20 +162,20 @@
 <!-- RESULTS OVERLAY -->
 <div id="results-overlay" style="display:none;position:fixed;inset:0;background:rgba(8,16,32,0.96);z-index:100;align-items:center;justify-content:center;flex-direction:column">
   <div class="panel" style="max-width:460px;width:92%">
-    <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--gold);text-align:center" id="rc-title">Informe del Día {{ partida.dia_actual }}</div>
-    <div style="text-align:center;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(201,168,76,.55);margin-bottom:18px">Resumen de operaciones</div>
-    <div class="stat-row"><span class="sr-lbl">Habitaciones</span><span class="sr-val gold-c" id="rc-rooms">—</span></div>
-    <div class="stat-row"><span class="sr-lbl">Ocupación</span><span class="sr-val gold-c" id="rc-occ">—</span></div>
-    <div class="stat-row"><span class="sr-lbl">Ingresos</span><span class="sr-val pos" id="rc-rev">—</span></div>
-    <div class="stat-row"><span class="sr-lbl">Gastos</span><span class="sr-val neg" id="rc-exp">—</span></div>
-    <div class="stat-row"><span class="sr-lbl">Reputación</span><span class="sr-val" id="rc-rep">—</span></div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--gold);text-align:center" id="rc-title">{{ tr.report_title|replace('{day}', partida.dia_actual) }}</div>
+    <div style="text-align:center;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(201,168,76,.55);margin-bottom:18px">{{ tr.ops_summary }}</div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.rooms }}</span><span class="sr-val gold-c" id="rc-rooms">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.occupancy }}</span><span class="sr-val gold-c" id="rc-occ">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.revenue }}</span><span class="sr-val pos" id="rc-rev">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.expenses }}</span><span class="sr-val neg" id="rc-exp">—</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.reputation }}</span><span class="sr-val" id="rc-rep">—</span></div>
     <div style="background:rgba(201,168,76,0.09);border:1px solid rgba(201,168,76,0.4);padding:14px;margin:16px 0;text-align:center">
-      <div style="font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px">Balance del día</div>
-      <div style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;line-height:1" id="rc-profit">$0</div>
+      <div style="font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:4px">{{ tr.day_balance }}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;line-height:1" id="rc-profit">{{ money(0, moneda) }}</div>
     </div>
     <div id="rc-tip" style="font-style:italic;font-size:.88rem;margin-bottom:16px;color:var(--text-light)"></div>
     <div class="text-center">
-      <button class="btn btn-gold" id="next-btn" onclick="location.reload()">Día Siguiente →</button>
+      <button class="btn btn-gold" id="next-btn" onclick="location.reload()">{{ tr.next_day }}</button>
     </div>
   </div>
 </div>
@@ -181,31 +183,38 @@
 
 {% block extra_script %}
 <script>
-// Placeholder mínimo para estimación — en producción usar endpoint /game/day con método GET
+const MONEY_SYMBOL = {{ money_symbol|tojson }};
+const LOCALE = {{ js_locale|tojson }};
+const UI_PERSONS = {{ tr.persons|tojson }};
+const UI_VIEW_FINAL = {{ tr.view_final|tojson }};
+const MONEY_FORMAT = function (value) {
+  return MONEY_SYMBOL + value.toLocaleString(LOCALE);
+};
+
+// Estimación mínima — en producción usar endpoint /game/day con método GET
 function updateEstimate() {
-  document.getElementById('price-disp').textContent = '$' + document.getElementById('price-sl').value;
-  document.getElementById('staff-disp').textContent = document.getElementById('staff-sl').value + ' personas';
-  document.getElementById('mkt-disp').textContent = '$' + document.getElementById('mkt-sl').value;
+  document.getElementById('price-disp').textContent = MONEY_FORMAT(parseInt(document.getElementById('price-sl').value, 10));
+  document.getElementById('staff-disp').textContent = document.getElementById('staff-sl').value + ' ' + UI_PERSONS;
+  document.getElementById('mkt-disp').textContent = MONEY_FORMAT(parseInt(document.getElementById('mkt-sl').value, 10));
 }
 
 async function submitDay(e) {
   e.preventDefault();
   const form = document.getElementById('game-form');
   const data = new FormData(form);
-  // Fetch API
   const resp = await fetch('{{ url_for("game.run_day") }}', { method: 'POST', body: data });
   const result = await resp.json();
   if (resp.ok) {
     document.getElementById('rc-rooms').textContent = result.rooms + '/20';
     document.getElementById('rc-occ').textContent = (result.occupancy * 100).toFixed(0) + '%';
-    document.getElementById('rc-rev').textContent = '$' + result.revenue.toLocaleString('es-ES');
-    document.getElementById('rc-exp').textContent = '$' + result.expenses.toLocaleString('es-ES');
-    document.getElementById('rc-profit').textContent = (result.profit >= 0 ? '+' : '') + '$' + result.profit.toLocaleString('es-ES');
+    document.getElementById('rc-rev').textContent = MONEY_FORMAT(result.revenue);
+    document.getElementById('rc-exp').textContent = MONEY_FORMAT(result.expenses);
+    document.getElementById('rc-profit').textContent = (result.profit >= 0 ? '+' : '') + MONEY_FORMAT(result.profit);
     document.getElementById('rc-profit').style.color = result.profit >= 0 ? '#2ecc71' : '#e74c3c';
     document.getElementById('rc-tip').textContent = result.feedback;
     document.getElementById('results-overlay').style.display = 'flex';
     if (result.game_over) {
-      document.getElementById('next-btn').textContent = '🏆 Ver Resultados Finales';
+      document.getElementById('next-btn').textContent = UI_VIEW_FINAL;
       document.getElementById('next-btn').onclick = () => window.location.assign(result.final_results_url);
     } else {
       document.getElementById('next-btn').onclick = () => window.location.reload();
