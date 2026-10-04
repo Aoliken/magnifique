@@ -18,6 +18,7 @@ COPY alembic ./alembic
 COPY services ./services
 COPY scripts ./scripts
 COPY alembic.ini run.py ./
+COPY manual-hotel-magnifique.html ./
 
 RUN useradd --create-home --uid 10001 appuser \
     && chown --recursive appuser:appuser /app

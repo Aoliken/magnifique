@@ -74,7 +74,7 @@ with app.app_context():
     # _db.Model.metadata se resuelve correctamente DENTRO del context
     target_metadata = _db.Model.metadata
     # Importar todos los modelos explícitamente para asegurar que se registran
-    from app.models import Usuario, Partida, Dia, Decision, Resultado, Ajuste
+    from app.models import Usuario, Partida, Dia, Decision, Resultado, Ajuste, Configuracion
     # Tables registradas:
     print("Tables en metadata:", list(target_metadata.tables.keys()))
 

@@ -151,3 +151,53 @@ class TestSimulation:
 
         expected_profit = result.revenue - result.expenses
         assert result.profit == expected_profit
+
+
+class TestDifficulty:
+    def _run(self, dificultad='media', **kwargs):
+        decisions = Decisions(
+            price=120, staff=4, marketing=100,
+            breakfast=False, pool=False, spa=False,
+        )
+        season = seasons.get_season(5)
+        event = events.GameEvent(
+            name='Día Normal ☁️', desc='Normal',
+            mod=Decimal('1.00'), prob=Decimal('0.33'), tip='Normal',
+        )
+        return simulation.simulate(
+            decisions, Decimal('3.0'), season, event,
+            add_noise=False, dificultad=dificultad, **kwargs,
+        )
+
+    def test_easy_raises_demand(self):
+        """'facil' debe subir la demanda vs 'media' con los mismos parámetros."""
+        media = self._run('media')
+        easy = self._run('facil')
+
+        assert easy.occupancy > media.occupancy
+
+    def test_medium_matches_default_behavior(self):
+        """'media' debe coincidir con el comportamiento por defecto."""
+        import random
+
+        random.seed(42)
+        default = self._run()
+        random.seed(42)
+        media = self._run('media')
+
+        assert default.occupancy == media.occupancy
+
+    def test_hard_variability_is_deterministic_under_seed(self):
+        """'dificil' debe variar la demanda; con seed fija el resultado es estable."""
+        import random
+
+        random.seed(7)
+        hard_a = self._run('dificil')
+        random.seed(7)
+        hard_b = self._run('dificil')
+        random.seed(11)
+        hard_c = self._run('dificil')
+
+        assert hard_a.occupancy == hard_b.occupancy
+        assert hard_a.occupancy != hard_c.occupancy
+        assert 0 <= hard_a.rooms_occupied <= 20

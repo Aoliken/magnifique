@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tr['tutorial_title'] }} — Hotel Magnifique{% endblock %}
+
+{% block navbar %}
+<div class="container-fluid d-flex align-items-center justify-content-between">
+  <div class="hotel-logo">✦ Hotel Magnifique</div>
+  <div class="d-flex align-items-center gap-2">
+    <a href="{{ url_for('game.menu') }}" class="btn btn-sm btn-outline-warning">{{ tr['back'] }}</a>
+    <form action="{{ url_for('auth.logout') }}" method="POST">
+      <button class="btn btn-sm btn-outline-warning" type="submit">{{ tr['logout'] }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="text-center my-3">
+  <h1 style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900;color:var(--gold);letter-spacing:.06em">📖 {{ tr['tutorial_title'] }}</h1>
+  <p style="color:var(--text-light);font-size:.9rem">{{ tr['tutorial_hint'] }}</p>
+</div>
+<div class="text-center my-3">
+  <a href="{{ url_for('game.manual') }}" class="btn btn-gold btn-sm" target="_blank" rel="noopener">{{ tr['tutorial_title'] }} ↗</a>
+</div>
+<iframe src="{{ url_for('game.manual') }}" title="{{ tr['tutorial_title'] }}" style="width:100%;height:72vh;border:1px solid rgba(201,168,76,.3);background:#fff"></iframe>
+{% endblock %}

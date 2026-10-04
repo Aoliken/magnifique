@@ -63,7 +63,7 @@ def register():
         db.session.commit()
 
         login_user(usuario)
-        return redirect(url_for('game.play'))
+        return redirect(url_for('game.menu'))
 
     return render_template('auth/register.html')
 
@@ -84,7 +84,7 @@ def login():
         if usuario and usuario.check_password(password):
             login_user(usuario)
             _set_session_duration(usuario)
-            return redirect(url_for('game.play'))
+            return redirect(url_for('game.menu'))
 
         flash('Email o contraseña incorrectos.', 'error')
 

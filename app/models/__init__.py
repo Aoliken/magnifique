@@ -8,5 +8,6 @@ from app.models.decision import Decision
 from app.models.resultado import Resultado
 from app.models.ajuste import Ajuste
 from app.models.auth_session import AuthSession
+from app.models.configuracion import Configuracion
 
-__all__ = ['Usuario', 'Partida', 'Dia', 'Decision', 'Resultado', 'Ajuste', 'AuthSession']
+__all__ = ['Usuario', 'Partida', 'Dia', 'Decision', 'Resultado', 'Ajuste', 'AuthSession', 'Configuracion']

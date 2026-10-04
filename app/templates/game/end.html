@@ -3,19 +3,19 @@
 {% block content %}
 <div class="text-center mt-5">
   <h1 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,5vw,2.8rem);font-weight:900;color:var(--gold)">
-    ¡Temporada Completada!
+    {{ tr.season_complete }}
   </h1>
   <div style="font-family:'Playfair Display',serif;font-size:clamp(4rem,12vw,6rem);font-weight:900;margin:12px 0;line-height:1;color:var(--gold-light)">
     {{ partida.grado_final }}
   </div>
   <div class="panel" style="max-width:500px;margin:0 auto;text-align:left">
-    <div class="stat-row"><span class="sr-lbl">Capital final</span><span class="sr-val">${{ "{:,}".format(partida.capital|int) }}</span></div>
-    <div class="stat-row"><span class="sr-lbl">Ganancia total</span><span class="sr-val" style="color:{{ 'var(--green)' if partida.ganancia_total > 0 else 'var(--red)' }}">{{ partida.ganancia_total }}</span></div>
-    <div class="stat-row"><span class="sr-lbl">Reputación final</span><span class="sr-val">{{ partida.reputacion }}</span></div>
-    <div class="stat-row"><span class="sr-lbl">Días jugados</span><span class="sr-val">{{ partida.dia_actual }}</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.final_capital }}</span><span class="sr-val">{{ money(partida.capital, moneda) }}</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.total_profit }}</span><span class="sr-val" style="color:{{ 'var(--green)' if partida.ganancia_total > 0 else 'var(--red)' }}">{{ money(partida.ganancia_total, moneda) }}</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.final_reputation }}</span><span class="sr-val">{{ partida.reputacion }}</span></div>
+    <div class="stat-row"><span class="sr-lbl">{{ tr.days_played }}</span><span class="sr-val">{{ partida.dia_actual }}</span></div>
     <div class="mt-4">
       <form method="POST" action="{{ url_for('game.new_game') }}">
-        <button type="submit" class="btn btn-gold">✦ Jugar de Nuevo ✦</button>
+        <button type="submit" class="btn btn-gold">{{ tr.play_again }}</button>
       </form>
     </div>
   </div>

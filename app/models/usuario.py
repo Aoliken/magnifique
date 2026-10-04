@@ -21,6 +21,9 @@ class Usuario(db.Model, UserMixin):
 
     # ── Relaciones ──────────────────────────────���──────
     partidas = db.relationship('Partida', back_populates='usuario', lazy='dynamic')
+    configuracion = db.relationship(
+        'Configuracion', back_populates='usuario', uselist=False, cascade='all, delete-orphan'
+    )
 
     # ── Métodos ─────────────────────────────────────
     def set_password(self, password: str):

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}{{ tr['ranking_title'] }} — Hotel Magnifique{% endblock %}
+
+{% block navbar %}
+<div class="container-fluid d-flex align-items-center justify-content-between">
+  <div class="hotel-logo">✦ Hotel Magnifique</div>
+  <div class="d-flex align-items-center gap-2">
+    <a href="{{ url_for('game.menu') }}" class="btn btn-sm btn-outline-warning">{{ tr['back'] }}</a>
+    <form action="{{ url_for('auth.logout') }}" method="POST">
+      <button class="btn btn-sm btn-outline-warning" type="submit">{{ tr['logout'] }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_style %}
+<style>
+.rank-wrap{max-width:760px;margin:36px auto 0}
+.rank-title{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:900;color:var(--gold);text-align:center;letter-spacing:.05em}
+.rank-sub{text-align:center;font-size:.85rem;letter-spacing:.28em;text-transform:uppercase;color:rgba(201,168,76,.6);margin-bottom:24px}
+.rank-table{width:100%;border-collapse:collapse}
+.rank-table th{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(201,168,76,.65);padding:10px 12px;border-bottom:1px solid rgba(201,168,76,.3);text-align:left}
+.rank-table td{padding:12px;border-bottom:1px solid rgba(201,168,76,.12);font-size:1rem}
+.rank-pos{font-family:'Playfair Display',serif;font-weight:700;color:var(--gold);font-size:1.2rem}
+.rank-player{color:var(--cream)}
+.rank-gain{font-family:'Playfair Display',serif;color:var(--green);font-weight:700}
+.rank-rep{color:var(--gold-light)}
+.rank-grade{font-size:1.2rem}
+.rank-empty{text-align:center;padding:30px;color:var(--text-light);font-style:italic}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rank-wrap">
+  <div class="rank-title">🏆 {{ tr['ranking_title'] }}</div>
+  <div class="rank-sub">— {{ tr['ranking_hint'] }} —</div>
+
+  <div class="panel">
+    {% if top %}
+    <table class="rank-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{{ tr['col_player'] }}</th>
+          <th>{{ tr['col_gain'] }}</th>
+          <th>{{ tr['col_rep'] }}</th>
+          <th>{{ tr['col_grade'] }}</th>
+          <th>{{ tr['col_days'] }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in top %}
+        <tr>
+          <td class="rank-pos">{{ loop.index }}</td>
+          <td class="rank-player">{{ p.usuario.nombre }}</td>
+          <td class="rank-gain">{{ money(p.ganancia_total, moneda) }}</td>
+          <td class="rank-rep">{{ p.reputacion }}</td>
+          <td class="rank-grade">{{ p.grado_final }}</td>
+          <td style="color:var(--text-light)">{{ p.dia_actual }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="rank-empty">{{ tr['ranking_empty'] }}</div>
+    {% endif %}
+  </div>
+
+  <div class="text-center mt-4">
+    <a href="{{ url_for('game.menu') }}" class="btn btn-gold">{{ tr['back'] }}</a>
+  </div>
+</div>
+{% endblock %}
