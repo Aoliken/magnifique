@@ -175,6 +175,71 @@ del new_password, confirmation
 
 Este procedimiento actualiza solamente una cuenta existente y usa `Usuario.set_password()`, que genera el hash bcrypt compatible con el inicio de sesión. El único valor persistido es el hash; la contraseña en texto plano no se registra ni se almacena. Si no se puede confirmar la identidad del administrador, detenerse y solicitar acceso al responsable de la base de datos.
 
+## Debugging
+
+Este flujo permite seguir la primera petición `GET /` de un visitante sin sesión y observar cómo `index()` decide qué respuesta devolver. Se usa un contenedor temporal con Flask en primer plano: el servicio habitual `flask-app` ejecuta Gunicorn, que no ofrece una terminal interactiva conectada al proceso que atiende la petición. Un breakpoint en ese servicio dejaría un worker detenido, pero no una consola utilizable para el estudiante.
+
+> **Advertencia:** realizar este procedimiento solo en desarrollo local. Nunca exponer una VPS pública con un breakpoint activo: cualquier petición podría detener un proceso de la aplicación y dejar datos o controles administrativos disponibles en una consola interactiva.
+
+### Flujo mínimo
+
+1. Activar el entorno requerido y dejar disponibles la base de datos y el servicio web interno:
+
+   ```shell
+   conda activate py3.12
+   docker compose up -d postgres web-service
+   docker compose stop flask-app
+   ```
+
+   Se detiene únicamente `flask-app` para liberar el puerto `5000`; `postgres` mantiene la misma base de datos y `web-service` permite completar el reenvío de la ruta pública cuando se continúe la ejecución.
+
+2. En `app/__init__.py`, dentro de `index()` y **justo antes** de la primera rama de usuario no autenticado, agregar temporalmente:
+
+   ```python
+   @app.get('/')
+   def index():
+       import ipdb
+       ipdb.set_trace()
+       if not current_user.is_authenticated:
+   ```
+
+   Esa ubicación detiene la petición antes de evaluar `current_user.is_authenticated`; por eso sirve para inspeccionar el estado inicial del primer `GET /`.
+
+3. Iniciar el contenedor de depuración desde otra terminal. El montaje usa el código local sin reconstruir la imagen y la instalación queda solo en el contenedor que se eliminará al salir:
+
+   ```shell
+   docker compose run --rm --service-ports \
+     -v "$PWD/app:/app/app:ro" \
+     flask-app \
+     sh -lc 'python -m pip install --user --no-cache-dir ipdb && flask --app run:app run --host=0.0.0.0 --port=5000'
+   ```
+
+   No agregar `ipdb` a `requirements.txt`: no es una dependencia permanente. Tampoco usar `--debug` en este paso; el recargador puede crear otro proceso y volver confusa la consola interactiva.
+
+4. Abrir `http://localhost:5000/` en una ventana privada o sin sesión. La terminal del paso anterior se detendrá en `ipdb` antes de la rama no autenticada. Ejecutar los comandos necesarios y luego `c` para que la petición continúe.
+
+### Comandos esenciales de `ipdb`
+
+| Comando | Acción |
+|---|---|
+| `n` | Ejecuta la línea actual y avanza a la siguiente sin entrar en llamadas. |
+| `s` | Entra en la función llamada por la línea actual. |
+| `c` | Continúa la ejecución hasta el próximo breakpoint o hasta terminar la petición. |
+| `p expresion` | Imprime el valor de una expresión, por ejemplo `p current_user.is_authenticated`. |
+| `w` | Muestra la pila de llamadas para saber cómo se llegó a `index()`. |
+| `q` | Sale del depurador y termina la ejecución de ese proceso. |
+
+### Limpieza y reinicio
+
+1. Detener Flask en primer plano con `Ctrl+C` (o usar `q` desde `ipdb`). Gracias a `--rm`, Compose elimina el contenedor temporal y con él la instalación temporal de `ipdb`.
+2. Quitar las dos líneas temporales `import ipdb` e `ipdb.set_trace()` de `app/__init__.py` y confirmar que no quedó un breakpoint en el diff.
+3. Restaurar el servicio normal con Gunicorn:
+
+   ```shell
+   docker compose up -d flask-app
+   git diff --check
+   ```
+
 ## Antes de hacer `git push` del proyecto
 
 ```bash

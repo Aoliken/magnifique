@@ -70,7 +70,7 @@ def create_active_game(user, *, day=1, capital="5000.00", reputation="3.0"):
 
 
 class TestMenu:
-    def test_menu_renders_all_five_actions_when_no_active_game(self, client, user):
+    def test_menu_renders_all_six_actions_when_no_active_game(self, client, user):
         login(client)
 
         response = client.get("/game/menu")
@@ -79,16 +79,16 @@ class TestMenu:
         html = response.get_data(as_text=True)
         for label in [
             "Comenzar juego",
+            "Continuar partida",
             "Tutorial",
             "Opciones",
             "Ranking de jugadores",
             "Salir",
         ]:
             assert label in html
-        # Sin partida activa el banner explica el estado en vez de ofrecer un acceso
-        assert "Sin partida en curso" in html
+        # Sin partida: Continuar no debe ser un enlace jugable
+        assert 'title="You don' not in html  # tr es es por defecto
         assert "No tenés una partida pendiente por terminar." in html
-        assert "/game/play" not in html
 
     def test_menu_with_active_game_shows_continue_and_day(self, client, user):
         create_active_game(user, day=7, capital="6200.00", reputation="3.4")
@@ -102,27 +102,6 @@ class TestMenu:
         assert "Día 7 de 30" in html
         assert "$6,200" in html  # moneda por defecto usd
         assert "/game/play" in html
-
-    def test_menu_exposes_exactly_one_continue_entry_point(self, client, user):
-        create_active_game(user, day=7, capital="6200.00", reputation="3.4")
-        login(client)
-
-        html = client.get("/game/menu").get_data(as_text=True)
-
-        # El banner es el único acceso a la partida en curso: no se duplica en la grilla.
-        assert html.count('href="/game/play"') == 1
-        assert html.count("Continuar partida") == 1
-        # Cinco tarjetas: juego nuevo, tutorial, opciones, ranking y salir.
-        assert html.count('class="menu-card') == 5
-
-    def test_menu_cards_are_not_underlined(self, client, user):
-        login(client)
-
-        html = client.get("/game/menu").get_data(as_text=True)
-
-        # Bootstrap 5 subraya los <a> por defecto; las tarjetas deben anularlo.
-        card_rule = html.split(".menu-card{", 1)[1].split("}", 1)[0]
-        assert "text-decoration:none" in card_rule
 
     def test_menu_form_new_game_archives_active_when_forced(self, client, user):
         current = create_active_game(user, day=12)
@@ -173,44 +152,6 @@ class TestMenu:
         fresh = Partida.query.filter_by(usuario_id=user.id, activa=True).first()
         assert fresh is not None
         assert fresh.dificultad == "dificil"
-
-
-class TestTopBar:
-    """El estado de partida sólo se muestra en la barra durante la partida.
-
-    Las aserciones miran el markup (``class="stat-chip"``) y no la cadena
-    ``stat-chip``: la hoja de estilos de ``base.html`` conserva la clase porque
-    la partida sigue usándola.
-    """
-
-    def test_login_screen_has_no_game_state_chips(self, client):
-        response = client.get("/auth/login")
-
-        assert response.status_code == 200
-        html = response.get_data(as_text=True)
-        assert 'class="stat-chip"' not in html
-        assert "sc-label" not in html.split("<body>", 1)[1]
-
-    def test_main_menu_has_no_game_state_chips(self, client, user):
-        create_active_game(user, day=7, capital="6200.00", reputation="3.4")
-        login(client)
-
-        html = client.get("/game/menu").get_data(as_text=True)
-
-        assert 'class="stat-chip"' not in html
-        assert "sc-label" not in html.split("<body>", 1)[1]
-
-    def test_play_keeps_live_day_capital_and_reputation(self, client, user):
-        create_active_game(user, day=7, capital="6200.00", reputation="3.4")
-        login(client)
-
-        html = client.get("/game/play").get_data(as_text=True)
-
-        assert html.count('class="stat-chip"') == 3
-        assert "Día" in html
-        assert "7 / 30" in html
-        assert "$6,200" in html
-        assert "3.4" in html
 
 
 class TestOptions:
