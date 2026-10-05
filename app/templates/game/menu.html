@@ -73,7 +73,6 @@
     <div class="gb-title">{{ tr['active_game'].format(day=partida.dia_actual) }}</div>
     <div class="gb-sub">{{ tr['nav_capital'] }}: <strong class="gold-c">{{ money(partida.capital, moneda) }}</strong> &nbsp;·&nbsp; {{ tr['nav_rep'] }}: <strong class="gold-c">{{ partida.reputacion }}</strong></div>
   </div>
-  <a href="{{ url_for('game.play') }}" class="btn btn-gold btn-sm">{{ tr['continue_game'] }} →</a>
 </div>
 {% else %}
 <div class="game-banner" style="justify-content:center">

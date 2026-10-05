@@ -89,6 +89,9 @@ class TestMenu:
         # Sin partida: Continuar no debe ser un enlace jugable
         assert 'title="You don' not in html  # tr es es por defecto
         assert "No tenés una partida pendiente por terminar." in html
+        # Regresión de merge 90f6ff9: los <a class="menu-card"> heredaban el
+        # subrayado por defecto del navegador porque la regla lo omitia.
+        assert "text-decoration:none" in html
 
     def test_menu_with_active_game_shows_continue_and_day(self, client, user):
         create_active_game(user, day=7, capital="6200.00", reputation="3.4")
@@ -102,6 +105,13 @@ class TestMenu:
         assert "Día 7 de 30" in html
         assert "$6,200" in html  # moneda por defecto usd
         assert "/game/play" in html
+        # Regresión de merge 90f6ff9: el banner y la card enlazaban ambos a
+        # /game/play. Un assert de presencia no detecta el duplicado; hay que
+        # contar para que el próximo merge que revierta esto falle.
+        assert html.count('href="/game/play"') == 1
+        # Cuenta solo el titulo de la card, no el comentario HTML
+        # "<!-- Continuar partida -->", que no es un control renderizado.
+        assert html.count('class="mc-title">Continuar partida<') == 1
 
     def test_menu_form_new_game_archives_active_when_forced(self, client, user):
         current = create_active_game(user, day=12)
